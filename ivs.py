@@ -112,7 +112,7 @@ class IdentityVerificationService(object):
 		self.jinja_env.filters['hostname'] = get_hostname
 
 		self.pxClasses = [PxData(self.redis),
-						  PxLogin(),Verify(CONFIG)]
+						  PxLogin(),Verify(CONFIG,self)]
 
 		self.urls = [
 			Rule('/', endpoint='index'),
@@ -247,6 +247,10 @@ if __name__ == '__main__':
 					   help='Set location (default=unknown)')
 	parser.add_argument('--name','-n', default=None,
 					   help='Set name (default=unknown)')
+	parser.add_argument('--logo', default='',
+					   help='Set logo url')
+	parser.add_argument('--bgcolor', default='',
+					   help='Set background color')
 	
 	parser.add_argument('--version', action='version', version='%(prog)s '+str(VERSION))
 	

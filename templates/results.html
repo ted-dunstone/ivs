@@ -1,0 +1,66 @@
+<!doctype html>
+
+  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Hero Widgets - Bootsnipp.com</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <style type="text/css">
+    .hero-widget { text-align: center; padding-top: 20px; padding-bottom: 20px;min-height:300px }
+.hero-widget .icon { display: block; font-size: 96px; line-height: 96px; margin-bottom: 10px; text-align: center; }
+.hero-widget var { display: block; height: 64px; font-size: 40px; line-height: 64px; font-style: normal; }
+.hero-widget label { font-size: 17px; }
+.hero-widget .options { margin-top: 10px; }    </style>
+    <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+</head>
+<body style="background-color:#{{config.bgcolor}}">
+	<br />
+
+<div class="container">
+	<div class="row">
+        {% for key in results.keys() recursive%}
+    	    
+        <div class="col-sm-3">
+            <div class="hero-widget well well-sm">
+                <div class="text">
+                    <label class="text-muted">{{ key }}</label>
+                </div>
+                <div class="icon">
+                    {%if results[key]['VerifySubjectResponsePackage']['Match']%}
+                     <font colot='green'><i class="glyphicon glyphicon-ok-sign"></i></font>
+                    {%else%}
+                      <i class="glyphicon glyphicon-remove-sign"></i>
+                    {%endif%}
+                </div>
+                <div class="text">
+                    {%if results[key]['VerifySubjectResponsePackage']['Match']%}
+                     <var>Match</var>
+                            <label class="text-muted">{{results[key]['VerifySubjectResponsePackage']['Gallery']}}</label>
+                    {%else%}
+                     <var>No Match</var>
+                    {%endif%}
+                    <!--
+                    {% for key2 in results[key]['VerifySubjectResponsePackage'].keys() recursive%}
+                        <label class="text-muted">{{ key2 }}</label>
+                        <label class="text-muted">{{results[key]['VerifySubjectResponsePackage'][key2]}}</label>
+                    {% endfor %}
+                    -->
+                    <br>
+                    <br>
+                    <img src='{{results[key]['VerifySubjectResponsePackage']['ImageUrl']}}' width=150>
+                </div>
+                <div class="options">
+                    <a href="javascript:;" class="btn btn-primary btn-lg"><i class="glyphicon glyphicon-plus"></i> Add a guest</a>
+                </div>
+            </div>
+             
+		</div>
+        {% endfor %}
+	</div>
+</div>
+</body>
+</html>
