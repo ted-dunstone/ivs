@@ -1,0 +1,184 @@
+.navbar {
+	margin-bottom: 0;
+}
+
+.column-center {
+	text-align: center;
+}
+
+.row-shadow {
+	box-shadow: 3px 9px 14px 0 #F1F1F1;
+}
+
+/* Vertical Spaces */
+.vspace0 {
+	padding: 0px 0px;
+}
+
+.vspace10 {
+	padding: 10px 0px;
+}
+
+.vspace20 {
+	padding: 20px 0px;
+}
+
+.vspace30 {
+	padding: 30px 0px;
+}
+
+.vspace40 {
+	padding: 40px 0px;
+}
+
+.vspace50 {
+	padding: 50px 0px;
+}
+
+.vspace60 {
+	padding: 60px 0px;
+}
+
+.vspace70 {
+	padding: 70px 0px;
+}
+
+.vspace80 {
+	padding: 80px 0px;
+}
+
+.vspace90 {
+	padding: 90px 0px;
+}
+
+.vspace100 {
+	padding: 100px 0px;
+}
+
+.bggrey1 {
+	background-color: #111111;
+}
+
+.bggrey2 {
+	background-color: #32363C;
+}
+
+.bggrey3 {
+	background-color: #34393D;
+}
+
+.bggrey4 {
+	background-color: #262626;
+}
+
+.bggrey5 {
+	background-color: #A1998F;
+}
+
+.bggrey6 {
+	background-color: #9C9C9C;
+}
+
+.bgbeige {
+	background-color: #C7B897;
+}
+
+.bgblue {
+	background-color: #148EC8;
+}
+
+.bglightblue {
+	background-color: #68B6D1;
+}
+
+.bgorange {
+	background-color: #E85254;
+}
+
+.bglightorange {
+	background-color: #D18765;
+}
+
+.bgdarkorange {
+	background-color: #C54429;
+}
+
+.bgorangepink {
+	background-color: #F96E5B;
+}
+
+.bbpinkpurple {
+	background-color: #8F5F6E;
+}
+
+.bgpink {
+	background-color: #F0AAA0;
+}
+
+.bgyellow {
+	background-color: #F8E3A5;
+}
+
+.bggreen {
+	background-color: #6BA03D;
+}
+
+.bgbluegreen {
+	background-color: #94CABE;
+}
+
+.left {
+	text-align: left;
+}
+
+.right {
+	text-align: right;
+}
+
+.center {
+	text-align: center;
+}
+
+/* RESPONSIVE CSS HACKS
+ -------------------------------------------------- */
+ @media (max-width: 480px) {
+	h1 {
+		font-size: 24px !important;
+	}
+
+	h2 {
+		font-size: 22px !important;
+	}
+
+	h3 {
+		font-size: 20px !important;
+	}
+}
+
+@media (max-width: 690px) {
+	h1 {
+		font-size: 26px !important;
+	}
+
+	h2 {
+		font-size: 24px !important;
+	}
+
+	h3 {
+		font-size: 22px !important;
+	}
+}
+
+ @media (max-width: 979px) {
+	h1 {
+		font-size: 28px !important;
+	}
+
+	h2 {
+		font-size: 26px !important;
+	}
+
+	h3 {
+		font-size: 24px !important;
+	}
+}

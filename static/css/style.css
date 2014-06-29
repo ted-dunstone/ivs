@@ -1,0 +1,51 @@
+body {
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	color: #5A5A5A;
+}
+
+h1, h2, h3, h4 {
+    font-weight: 200;
+    letter-spacing: -1px;
+    line-height: 1;
+    margin: 20px 0;
+}
+
+h1 {
+	font-size: 66px;
+}
+
+h2 {
+	font-size: 50px;
+}
+
+h3 {
+	font-size: 40px;
+}
+
+h4 {
+	font-size: 30px;
+}
+
+h5 {
+	font-size: 25px;
+}
+
+h6 {
+	font-size: 20px;
+}
+
+p {
+	font-size: 16px;
+}
+
+footer {
+}
+
+.line {
+	background: url("../img/line.gif") repeat-x scroll center center;
+}
+
+.line span {
+	padding: 0 20px;
+	background-color: #FFFFFF;
+}

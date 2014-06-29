@@ -1,241 +1,691 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>{{config.name}} - {{action.name}} </title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <style type="text/css">
-canvas {
-    display: none;
-}
-video, img, #startbutton {
-    display: block;
-    float: left;
-    border: 10px solid #fff;
-    border-radius: 10px;
-	width: 200px;
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />	
+	<title>Responsive Web Mobile</title>
 
-}
-#startbutton {
-    background: green;
-    border: none;
-    color: #fff;
-    margin: 100px 20px 20px 20px;
-    padding: 10px 20px;
-    font-size: 20px;
-}
-        </style>
-    <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+	<!-- Set the viewport width to device width for mobile -->
+  	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  	<!-- IE compatibility mode -->
+  	<meta http-equiv="X-UA-Compatible" content="IE=10,chrome=1" />
+
+	<!-- Included Bootstrap CSS File -->
+	<link rel="stylesheet" href="/static/js/bootstrap/css/bootstrap.min.css" />
+
+	<!-- Included Bootstrap Extension CSS File to modify some behaviours -->
+	<link rel="stylesheet" href="/static/css/bootstrap-extensions.css" />
 	
-	<link rel="stylesheet" href="//cdn.jsdelivr.net/ladda.bootstrap/0.1/ladda-themeless.min.css">
-	<script src="//cdn.jsdelivr.net/ladda.bootstrap/0.1/spin.min.js"></script>
-	<script src="//cdn.jsdelivr.net/ladda.bootstrap/0.1/ladda.min.js"></script>
+	<!-- Includes FontAwesome -->
+	<link rel="stylesheet" href="/static/css/font-awesome/css/font-awesome.min.css" />
+
+	<!-- Css -->	
+	<link rel="stylesheet" href="/static/css/style.css" />
+
 </head>
-<body style="background-color:#{{config.bgcolor}}">
-  
-	  <div class="row">
-    <div class="col-md-4 col-md-offset-2">
-		<img align="right" src="{{config.logo}}"></img>
-		<h1>{{config.name}}</h1>
-		<h1>{{action.name}}</h1>
-        <div class="user-image">
-                <!--img src="http://www.gravatar.com/avatar/2ab7b2009d27ec37bffee791819a090c?s=100&d=mm&r=g" class="img-circle"-->
-				
+<body>
+<header>
+	<!-- Navbar -->
+	<div class="navbar">
+		<div class="container">
+			<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".nav-collapse">
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+				<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="/">RWM</a>
+			<div class="nav-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li><a href="#">link 1</a></li>
+					<li><a href="#">link 2</a></li>
+					<li><a href="#">link 3</a></li>
+					<li><a href="#">link 4</a></li>
+					<li class="dropdown">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">Link 5 <b class="caret"></b></a>
+						<ul class="dropdown-menu">
+							<li><a href="#">Link 5.1</a></li>
+							<li><a href="#">Link 5.2</a></li>
+							<li><a href="#">Link 5.3</a></li>
+							<li><a href="#">Link 5.4</a></li>
+							<li><a href="#">Link 5.5</a></li>
+						</ul>
+					</li>
+				</ul>
+			</div>
 		</div>
-      <form class="form-horizontal" action="/{{action.url}}" method="post" enctype="multipart/form-data">
-        <fieldset>
-
-          <!-- Form Name -->
-          <legend>Personal Details</legend>
-
-          <!-- Text input-->
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">Identifier</label>
-            <div class="col-sm-10">
-              <input type="text" placeholder="Identifier" name="Identity.SubjectID" class="form-control" value="I1">
-            </div>
-          </div>
-		  
-		  {%if action.name=='Authentication Service'%}
-		  <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">Hub Request Organisations</label>
-            <div class="col-sm-4">
-          <select multiple>
-			<option value="all" selected>All</option>
-			<option value="Drivers Licences">- Driver Licence</option>
-			<option value="Passports">- Passports</option>
-			<option value="Immigration">- Immigration</option>
-			<option value="Immigration">- Police</option>
-		</select>
-			</div>
-		  
-            <label class="col-sm-2 control-label" for="textinput">Hub Request Locations</label>
-            <div class="col-sm-4">
-          <select multiple>
-			<option value="all" selected>All</option>
-			<option value="Drivers Licences">- NSW</option>
-			<option value="Passports">- VIC</option>
-			<option value="Immigration">- QLD</option>
-			<option value="Immigration">- SA</option>
-		</select>
-			</div>
-		  </div>
-
-		  <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">Hub Request Type</label>
-            <div class="col-sm-10">
-          <select>
-			<option value="all">Idenitification</option>
-			<option value="Drivers Licences" selected>Authentication</option>
-		</select>
-			</div>
-		  </div>
-		  {%endif%}
-		  
-          <!-- Text input-->
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">First Name</label>
-            <div class="col-sm-10">
-              <input type="text" placeholder="First Name" name="first" class="form-control">
-            </div>
-          </div>
-
-          <!-- Text input-->
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">Last Name</label>
-            <div class="col-sm-10">
-              <input type="text" placeholder="Last Name" name="last" class="form-control">
-            </div>
-          </div>
-
-          
-          
-          <div class="form-group">
-           <label class="col-sm-2 control-label" for="textinput">Upload image</label>
-           <div class="col-sm-10"><input type="file" accept="image/*" capture="camera" name="image"></div>
-          </div>
-
-
-          <!-- Text input-->
-          <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">Country of Birth</label>
-            <div class="col-sm-4">
-              <input type="text" placeholder="Country" class="form-control">
-            </div>
-
-            <label class="col-sm-2 control-label" for="textinput">Date of Birth</label>
-            <div class="col-sm-4">
-              <input type="text" placeholder="Post Code" class="form-control">
-            </div>
-            
-            
-          </div>
-		  
-		  
-          <div class="form-group">
-            <div class="col-sm-offset-2 col-sm-10">
-              <div class="pull-right">
-                <button type="submit" class="btn btn-default ">Cancel</button>
-                <button type="submit" class="btn btn-primary ladda-button" data-style="expand-left">Submit</button>
-              </div>
-            </div>
-          </div>
-		<input type="hidden"  name="cameraImage" id="cameraImage">
-        <input type="hidden" name="cameraImage2" id="cameraImage2" value="blah">
-        </fieldset>
-        
-      </form>
-    </div><!-- /.col-lg-12 -->
-	<div class="col-md-2" id="camera">
-		<video id="video"></video>
-
-		<br />
-		<br>
-			<br>
-<button id="startbutton">Take photo</button>
-<canvas id="canvas"></canvas>
-<img src="" id="photo" alt="photo">
 	</div>
-</div><!-- /.row -->	
-</body>
-<script>
+	<!-- /Navbar -->
 
-function isiPhone(){
-    return (
-        //Detect iPhone
-        (navigator.platform.indexOf("iPhone") != -1) ||
-        //Detect iPad
-        (navigator.platform.indexOf("iPad") != -1)
-    );
-}
-if (isiPhone()) document.getElementById("camera").style.display = 'none';
+	<!-- Carousel -->
+	<div id="carousel" class="carousel slide">
+		<!-- Indicators -->
+		<ol class="carousel-indicators">
+			<li data-target="#carousel" data-slide-to="0" class="active"></li>
+			<li data-target="#carousel" data-slide-to="1"></li>
+			<li data-target="#carousel" data-slide-to="2"></li>
+		</ol>
 
-	(function() {
+		<!-- Wrapper for slides -->
+		<div class="carousel-inner">
+			<div class="item active">
+				<img src="holder.js/1900x500/auto/#555:#333/text:Slide1" alt="" />
+				<div class="carousel-caption">
+					<h1>New Responsive Package</h1>
+					<p>everything changed again!</p>
+				</div>
+			</div>
 
-  var streaming = false,
-      video        = document.querySelector('#video'),
-      cover        = document.querySelector('#cover'),
-      canvas       = document.querySelector('#canvas'),
-      photo        = document.querySelector('#photo'),
-      startbutton  = document.querySelector('#startbutton'),
-      width = 200,
-      height = 0;
+			<div class="item">
+				<img src="holder.js/1900x500/auto/#555:#333/text:Slide2" alt="" />
+				<div class="carousel-caption">
+					<h1>Made with Bootstrap 3</h1>
+				</div>
+			</div>
 
-  navigator.getMedia = ( navigator.getUserMedia || 
-                         navigator.webkitGetUserMedia ||
-                         navigator.mozGetUserMedia ||
-                         navigator.msGetUserMedia);
+			<div class="item">
+				<img src="holder.js/1900x500/auto/#555:#333/text:Slide3" alt="" />
+				<div class="carousel-caption">
+					<h1>Download the package!</h1>
+				</div>
+			</div>
+		</div>
 
-  navigator.getMedia(
-    { 
-      video: true, 
-      audio: false 
-    },
-    function(stream) {
-      if (navigator.mozGetUserMedia) { 
-        video.mozSrcObject = stream;
-      } else {
-        var vendorURL = window.URL || window.webkitURL;
-        video.src = vendorURL ? vendorURL.createObjectURL(stream) : stream;
-      }
-      video.play();
-    },
-    function(err) {
-      console.log("An error occured! " + err);
-    }
-  );
+		<!-- Controls -->
+		<a class="left carousel-control" href="#carousel" data-slide="prev">
+			<span class="icon-prev"></span>
+		</a>
+		<a class="right carousel-control" href="#carousel" data-slide="next">
+			<span class="icon-next"></span>
+		</a>
+	</div>
+	<!-- /Carousel -->
+</header>
 
-  video.addEventListener('canplay', function(ev){
-    if (!streaming) {
-      height = video.videoHeight / (video.videoWidth/width);
-      video.setAttribute('width', width);
-      video.setAttribute('height', height);
-      canvas.setAttribute('width', width);
-      canvas.setAttribute('height', height);
-      streaming = true;
-    }
-  }, false);
+<!-- One Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<h1 class="line"><span>1 Column Row Example</span></h1>
+				<p class="lead">One column example. Scroll down the page to see a variety of columns layouts, maybe you can find the one you were looking for.</p>
+				<p>The content is centered because i added a class called <strong>.column-center</strong> to my <strong>responsive-extensions.css</strong>. You can remove that class to fall back to defaults. Every <strong>H1 tag</strong> has a line gif on sides. To remove it delete the class <strong>.line.</strong>. In this page every row has a container div in a way you can give a background color or pattern to all the row size and also to apply a row shadow with the class <strong>.row-shadow</strong>. Each column is made with the new <strong>Bootstrap 3</strong> class <strong>.col-lg-*</strong> where the asterix is the column width calcutated on a <strong>12 columns grid</strong> system.</p>
+				<a class="btn btn-lg btn-info" href="http://www.responsivewebmobile.com">Back to RWM</a>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /One Columns Content -->
 
-  function takepicture() {
-    canvas.width = width;
-    canvas.height = height;
-    canvas.getContext('2d').drawImage(video, 0, 0, width, height);
-    var data = canvas.toDataURL('image/png');
-    photo.setAttribute('src', data);
-	document.getElementById("cameraImage").value = data
+<!-- One Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<div class="jumbotron left">
+					<h1>An Other 1 Column Row Example<br /><small>Subtext for header</small></h1>
+					<p><strong>Sed odio</strong> dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros.<br />
+					Donec sed odio dui. <strong>Etiam porta</strong> sem malesuada magna mollis euismod. Nullam id dolor id nibh <strong>ultricies vehicula</strong> ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.</p>
+					<a class="btn btn-lg btn-info" href="#">View details</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /One Columns Content -->
 
-  }
-  
-  startbutton.addEventListener('click', function(ev){
-      takepicture();
-    ev.preventDefault();
-  }, false);
-  
-})();
+<!-- Two Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<h1 class="line"><span>2 Columns Row Example</span></h1>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-6">
+				<a href="#" class="thumbnail">
+      				<img class="img-square img-responsive" data-src="holder.js/600x300" alt="" />
+    			</a>
+				<h2>2 Columns</h2>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.</p>
+				<p><a class="btn btn-default btn-lg" href="#">View details &raquo;</a></p>
+			</div>
+			<div class="col-lg-6">
+				<a href="#" class="thumbnail">
+      				<img class="img-square img-responsive" data-src="holder.js/600x300" alt="" />
+    			</a>
+				<h2>2 Columns</h2>
+				<p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh.</p>
+				<p><a class="btn btn-default btn-lg" href="#">View details &raquo;</a></p>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /Two Columns Content -->
+
+<!-- Three Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<h1 class="line"><span>3 Columns Row Example</span></h1>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-4">
+				<a href="#" class="thumbnail">
+					<img class="img-circle" data-src="holder.js/240x240" alt="" />
+				</a>
+				<h3>3 Columns</h3>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.</p>
+				<p><a class="btn btn-default" href="#">View details &raquo;</a></p>
+			</div>
+			<div class="col-lg-4">
+				<a href="#" class="thumbnail">
+					<img class="img-circle" data-src="holder.js/240x240" alt="" />
+				</a>
+				<h3>3 Columns</h3>
+				<p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh.</p>
+				<p><a class="btn btn-default" href="#">View details &raquo;</a></p>
+			</div>
+			<div class="col-lg-4">
+				<a href="#" class="thumbnail">
+					<img class="img-circle" data-src="holder.js/240x240" alt="" />
+				</a>
+				<h3>3 Columns</h3>
+				<p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
+				<p><a class="btn btn-default" href="#">View details &raquo;</a></p>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /Three Columns Content -->
+
+<!-- Four Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<h1 class="line"><span>4 Columns Row Example</span></h1>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-3">
+				<a href="#" class="thumbnail">
+					<img class="img-square" data-src="holder.js/300x150" alt="" />
+				</a>
+				<h4>4 Columns</h4>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+				<p><a class="btn btn-default btn-sm" href="#">View details &raquo;</a></p>
+			</div>
+			<div class="col-lg-3">
+				<a href="#" class="thumbnail">
+					<img class="img-square" data-src="holder.js/300x150" alt="" />
+				</a>
+				<h4>4 Columns</h4>
+				<p>Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum.</p>
+				<p><a class="btn btn-default  btn-sm" href="#">View details &raquo;</a></p>
+			</div>
+			<div class="col-lg-3">
+				<a href="#" class="thumbnail">
+					<img class="img-square" data-src="holder.js/300x150" alt="" />
+				</a>
+				<h4>4 Columns</h4>
+				<p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper.</p>
+				<p><a class="btn btn-default  btn-sm" href="#">View details &raquo;</a></p>
+			</div>
+			<div class="col-lg-3">
+				<a href="#" class="thumbnail">
+					<img class="img-square" data-src="holder.js/300x150" alt="" />
+				</a>
+				<h4>4 Columns</h4>
+				<p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper.</p>
+				<p><a class="btn btn-default  btn-sm" href="#">View details &raquo;</a></p>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /Four Columns Content -->
+
+<!-- 2 Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<h1 class="line"><span>An other 2 Columns Row Example</span></h1>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row-container">
+	<div class="container">
+		<div class="row vspace30">
+			<div class="col-lg-6">
+				<h2>An other example of <span class="text-muted">Two Columns</span></h2>
+				<p class="lead">Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.</p>
+				<blockquote>Morbi leo risus, porta ac consectetur ac, vestibulum at eros.</blockquote>
+				<a class="btn btn-default btn-lg" href="#">View details &raquo;</a>
+			</div>
+			<div class="col-lg-6">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/880x350" alt="" />
+				</a>
+			</div>
+		</div>
+
+		<div class="row vspace30">
+			<div class="col-lg-8">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/880x390/text:video clip" alt="" />
+				</a>
+			</div>
+			<div class="col-lg-4">
+				<h2>An other example of <span class="text-muted">Two Columns</span></h2>
+				<p class="lead">Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.</p>
+				<a class="btn btn-default btn-lg" href="#">View details &raquo;</a>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /2 Columns Content -->
+
+<!-- 2 Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<h1 class="line"><span>An other 2 Columns Row Example</span></h1>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row-container">
+	<div class="container">
+		<div class="row vspace30">
+			<div class="col-lg-3">
+				<div class="list-group">
+					<a href="#" class="list-group-item active">
+						Cras justo odio
+					</a>
+					<a href="#" class="list-group-item">Dapibus ac facilisis in</a>
+					<a href="#" class="list-group-item">Morbi leo risus</a>
+					<a href="#" class="list-group-item">Porta ac consectetur ac</a>
+					<a href="#" class="list-group-item">Vestibulum at eros</a>
+				</div>
+			</div>
+
+			<div class="col-lg-9">
+				<h2>An other example of <span class="text-muted">Two Columns</span></h2>
+				<p class="lead">Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna</p>
+				<p class="lead">Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur?</p>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /2 Columns Content -->
+
+<!-- 2 Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<h1 class="line"><span>An other 2 Columns Row Example</span></h1>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row-container">
+	<div class="container">
+		<div class="row vspace30">
+			<div class="col-lg-7">
+				<h2>An other example of <span class="text-muted">Two Columns</span></h2>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna</p>
+				<p>Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur?</p>
+				<p>Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem.</p>
+			</div>
+
+			<div class="col-lg-5">
+				<div class="list-group">
+					<a href="#" class="list-group-item active">
+						<h4 class="list-group-item-heading">List group item heading</h4>
+						<p class="list-group-item-text">Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent cursus magna.</p>
+					</a>
+					<a href="#" class="list-group-item">
+						<h4 class="list-group-item-heading">List group item heading</h4>
+						<p class="list-group-item-text">Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent cursus magna.</p>
+					</a>
+					<a href="#" class="list-group-item">
+						<h4 class="list-group-item-heading">List group item heading</h4>
+						<p class="list-group-item-text">Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent cursus magna.</p>
+					</a>
+					<a href="#" class="list-group-item">
+						<h4 class="list-group-item-heading">List group item heading</h4>
+						<p class="list-group-item-text">Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent cursus magna.</p>
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /2 Columns Content -->
+
+<!-- 3 Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<h1 class="line"><span>An other 3 Columns Row Example</span></h1>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row-container">
+	<div class="container">
+		<div class="row vspace30">
+			<div class="col-lg-6">
+				<h4>An other example of <span class="text-muted">Three Columns</span></h4>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.</p>
+				<h4>An other example of <span class="text-muted">Three Columns</span></h4>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.</p>
+			</div>
+			<div class="col-lg-3">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x280" alt="" />
+				</a>
+			</div>
+			<div class="col-lg-3">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x280" alt="" />
+				</a>
+			</div>
+		</div>
+
+		<div class="row vspace30">
+			<div class="col-lg-6">
+				<!-- Slider -->
+				<div id="slider" class="carousel slide">
+					<!-- Indicators -->
+					<ol class="carousel-indicators">
+						<li data-target="#slider" data-slide-to="0" class="active"></li>
+						<li data-target="#slider" data-slide-to="1"></li>
+						<li data-target="#slider" data-slide-to="2"></li>
+					</ol>
+
+					<!-- Wrapper for slides -->
+					<div class="carousel-inner">
+						<div class="item active">
+							<img src="holder.js/600x450/auto/#999:#FFF/text:Slide 1" alt="" />
+						</div>
+
+						<div class="item">
+							<img src="holder.js/600x450/auto/#999:#FFF/text:Slide 2" alt="" />
+						</div>
+
+						<div class="item">
+							<img src="holder.js/600x450/auto/#999:#FFF/text:Slide 3" alt="" />
+						</div>
+					</div>
+
+					<!-- Controls -->
+					<a class="left carousel-control" href="#slider" data-slide="prev">
+						<span class="icon-prev"></span>
+					</a>
+					<a class="right carousel-control" href="#slider" data-slide="next">
+						<span class="icon-next"></span>
+					</a>
+				</div>
+				<!-- /Carousel -->
+			</div>
+
+			<div class="col-lg-6">
+				<h4>An other example of <span class="text-muted">Two Columns</span></h4>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.</p>
+				<h4>An other example of <span class="text-muted">Two Columns</span></h4>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.</p>
+				<h4>An other example of <span class="text-muted">Two Columns</span></h4>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent commodo cursus magna.</p>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /3 Columns Content -->
+
+<!-- 4 Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<h1 class="line"><span>4 Columns Row Example</span></h1>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row-container">
+	<div class="container">
+		<div class="row vspace30">
+			<div class="col-lg-3">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x250" alt="" />
+				</a>
+			</div>
+			<div class="col-lg-3">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x250" alt="" />
+				</a>
+			</div>
+			<div class="col-lg-3">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x250" alt="" />
+				</a>
+			</div>
+			<div class="col-lg-3">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x250" alt="" />
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /4 Columns Content -->
+
+<!-- 4 Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<h1 class="line"><span>An other 4 Columns Row Example</span></h1>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row-container">
+	<div class="container">
+		<div class="row vspace30">
+			<div class="col-lg-3">
+				<h4>An other example of <span class="text-muted">Four Columns</span></h4>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent cursus magna.</p>
+				<a href="#">more...</a>
+			</div>
+			<div class="col-lg-3">
+				<h4>An other example of <span class="text-muted">Four Columns</span></h4>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent cursus magna.</p>
+				<a href="#">more...</a>
+			</div>
+			<div class="col-lg-3">
+				<h4>An other example of <span class="text-muted">Four Columns</span></h4>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent cursus magna.</p>
+				<a href="#">more...</a>
+			</div>
+			<div class="col-lg-3">
+				<h4>An other example of <span class="text-muted">Four Columns</span></h4>
+				<p>Donec sed odio dui. Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit. Morbi leo risus, porta ac consectetur ac, vestibulum at eros. Praesent cursus magna.</p>
+				<a href="#">more...</a>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /4 Columns Content -->
+
+<!-- 4 Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<h1 class="line"><span>An other 4 Columns Row Example</span></h1>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row-container">
+	<div class="container">
+		<div class="row vspace30">
+			<div class="col-lg-3">
+				<div class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x200" alt="" />
+					<div class="caption">
+						<h4>Thumbnail label</h4>
+						<p>Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+						<p><a href="#" class="btn btn-primary">Buy</a> <a href="#" class="btn btn-default">Zoom</a></p>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-3">
+				<div class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x200" alt="" />
+					<div class="caption">
+						<h4>Thumbnail label</h4>
+						<p>Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+						<p><a href="#" class="btn btn-primary">Buy</a> <a href="#" class="btn btn-default">Zoom</a></p>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-3">
+				<div class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x200" alt="" />
+					<div class="caption">
+						<h4>Thumbnail label</h4>
+						<p>Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+						<p><a href="#" class="btn btn-primary">Buy</a> <a href="#" class="btn btn-default">Zoom</a></p>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-3">
+				<div class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x200" alt="" />
+					<div class="caption">
+						<h4>Thumbnail label</h4>
+						<p>Etiam porta sem malesuada magna mollis euismod. Nullam id dolor id nibh ultricies vehicula ut id elit.</p>
+						<p><a href="#" class="btn btn-primary">Buy</a> <a href="#" class="btn btn-default">Zoom</a></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /4 Columns Content -->
+
+<!-- 6 Columns Content -->
+<div class="row-container">
+	<div class="container column-center">
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				<h1 class="line"><span>6 Columns Row Example</span></h1>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row-container">
+	<div class="container">
+		<div class="row vspace30">
+			<div class="col-lg-2">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x80" alt="" />
+				</a>
+			</div>
+			<div class="col-lg-2">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x80" alt="" />
+				</a>
+			</div>
+			<div class="col-lg-2">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x80" alt="" />
+				</a>
+			</div>
+			<div class="col-lg-2">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x80" alt="" />
+				</a>
+			</div>
+			<div class="col-lg-2">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x80" alt="" />
+				</a>
+			</div>
+			<div class="col-lg-2">
+				<a href="#" class="thumbnail">
+					<img class="img-square img-responsive" data-src="holder.js/300x80" alt="" />
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- /6 Columns Content -->
+
+<footer>
+	<div class="container">
+		<div class="row vspace30">
+			<div class="col-lg-4">
+
+			</div>
+			<div class="col-lg-4">
+				
+			</div>
+			<div class="col-lg-4">
+			
+			</div>
+		</div>
+
+		<div class="row vspace30">
+			<div class="col-lg-12">
+				&copy;&nbsp;copyright 2013
+			</div>
+		</div>
+	</div>
+</footer>
 	
-Ladda.bind( 'button[type=submit]' );
-</script>
+	<!-- jQuery include (http://jquery.com/) -->
+	<script src="/static/js/jquery-1.10.2.min.js"></script>
+	<!-- Include all compiled Bootstrap plugins (http://getbootstrap.com/) -->
+	<script src="/static/js/bootstrap/js/bootstrap.min.js"></script>
+	<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+	<script src="/static/js/respond.min.js"></script>
+	<!-- Holder renders image placeholders entirely on the client side (http://imsky.github.io/holder/) -->
+	<script src="/static/js/holder.js"></script>
+	<!-- Your javascript file -->
+	<script src="/static/js/script.js"></script>
+</body>
 </html>
