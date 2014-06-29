@@ -1,6 +1,7 @@
 from werkzeug.routing import Map, Rule
 from werkzeug.wrappers import Response
 
+import pika # RabbitMQ Interface
 import logging
 from betaface import BetaFaceAPI
 
@@ -290,7 +291,7 @@ def get_node_display_name(node):
 
 def send_request(node,service,dict_obj):
     global CONFIG
-    
+    Q_MGR.push(get_current_node_info()['name']+'_outgoing',dict_obj) 
     
     headers = {'content-type': 'application/json'}
     print "="*40
@@ -356,6 +357,58 @@ def create_hub_node_info():
                 'logo':CONFIG.logo
             })
 
+class HubQueue(object):
+    def __init__(self, queueName, channel, exchange=''):
+        self.queueName = queueName
+        self.channel = channel
+        self.exchange = exchange
+    
+    def create(self):
+        self.channel.queue_declare(queue=self.queueName)
+        
+    def push(self, contents):
+        return self.channel.basic_publish(exchange=self.exchange,
+                      routing_key=self.queueName,
+                      body=str(contents))
+    
+    def pull(self):
+        for method_frame, properties, body in self.channel.consume(self.queueName):
+            # Display the message parts and ack the message
+            #print method_frame, properties, body
+            channel.basic_ack(method_frame.delivery_tag)
+            return body
+            # Escape out of the loop after 10 messages
+            #if method_frame.delivery_tag == 10:
+            #    break
+
+    
+
+class QueueManager(object):
+    
+    def __init__(self, ):
+        logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.CRITICAL)
+        self.connection = pika.BlockingConnection(pika.ConnectionParameters(
+        host='localhost'))
+        self.channel = self.connection.channel()
+        self.queues = {}
+        
+    def createQueue(self, queueName):
+        q = HubQueue(queueName, self.channel)
+        q.create()
+        self.queues[queueName]=q
+        
+    def push(self, queueName, contents):
+        if queueName not in self.queues:
+            self.createQueue(queueName)
+        self.queues[queueName].push(contents)
+
+    def pull(self, queueName):
+        return self.queues[queueName].pull(contents)
+    
+
+    
+    
+
 class Verify(object):
     
     def __init__(self,CONFIG_IN, service):
@@ -368,8 +421,13 @@ class Verify(object):
                         Rule('/log', endpoint='log')]
         global CONFIG
         CONFIG = CONFIG_IN
+        global Q_MGR
+        Q_MGR = QueueManager()
+        
         self.service = service
         self.redis = service.redis
+        
+        
         if (CONFIG.hub_url):
             # if its a node then add it
             self.hub = create_hub_node_info()
@@ -377,6 +435,8 @@ class Verify(object):
                                 "notify",
                                 get_current_node_info()))
         
+        Q_MGR.createQueue(CONFIG.name+'_incomming')
+        Q_MGR.createQueue(CONFIG.name+'_outgoing')
         
     def on_verify(self, request):
         print str(request.args.keys())
