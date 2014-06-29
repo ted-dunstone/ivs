@@ -1,0 +1,241 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{config.name}} - {{action.name}} </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <style type="text/css">
+canvas {
+    display: none;
+}
+video, img, #startbutton {
+    display: block;
+    float: left;
+    border: 10px solid #fff;
+    border-radius: 10px;
+	width: 200px;
+
+}
+#startbutton {
+    background: green;
+    border: none;
+    color: #fff;
+    margin: 100px 20px 20px 20px;
+    padding: 10px 20px;
+    font-size: 20px;
+}
+        </style>
+    <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+	
+	<link rel="stylesheet" href="//cdn.jsdelivr.net/ladda.bootstrap/0.1/ladda-themeless.min.css">
+	<script src="//cdn.jsdelivr.net/ladda.bootstrap/0.1/spin.min.js"></script>
+	<script src="//cdn.jsdelivr.net/ladda.bootstrap/0.1/ladda.min.js"></script>
+</head>
+<body style="background-color:#{{config.bgcolor}}">
+  
+	  <div class="row">
+    <div class="col-md-4 col-md-offset-2">
+		<img align="right" src="{{config.logo}}"></img>
+		<h1>{{config.name}}</h1>
+		<h1>{{action.name}}</h1>
+        <div class="user-image">
+                <!--img src="http://www.gravatar.com/avatar/2ab7b2009d27ec37bffee791819a090c?s=100&d=mm&r=g" class="img-circle"-->
+				
+		</div>
+      <form class="form-horizontal" action="/{{action.url}}" method="post" enctype="multipart/form-data">
+        <fieldset>
+
+          <!-- Form Name -->
+          <legend>Personal Details</legend>
+
+          <!-- Text input-->
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="textinput">Identifier</label>
+            <div class="col-sm-10">
+              <input type="text" placeholder="Identifier" name="Identity.SubjectID" class="form-control" value="I1">
+            </div>
+          </div>
+		  
+		  {%if action.name=='Authentication Service'%}
+		  <div class="form-group">
+            <label class="col-sm-2 control-label" for="textinput">Hub Request Organisations</label>
+            <div class="col-sm-4">
+          <select multiple>
+			<option value="all" selected>All</option>
+			<option value="Drivers Licences">- Driver Licence</option>
+			<option value="Passports">- Passports</option>
+			<option value="Immigration">- Immigration</option>
+			<option value="Immigration">- Police</option>
+		</select>
+			</div>
+		  
+            <label class="col-sm-2 control-label" for="textinput">Hub Request Locations</label>
+            <div class="col-sm-4">
+          <select multiple>
+			<option value="all" selected>All</option>
+			<option value="Drivers Licences">- NSW</option>
+			<option value="Passports">- VIC</option>
+			<option value="Immigration">- QLD</option>
+			<option value="Immigration">- SA</option>
+		</select>
+			</div>
+		  </div>
+
+		  <div class="form-group">
+            <label class="col-sm-2 control-label" for="textinput">Hub Request Type</label>
+            <div class="col-sm-10">
+          <select>
+			<option value="all">Idenitification</option>
+			<option value="Drivers Licences" selected>Authentication</option>
+		</select>
+			</div>
+		  </div>
+		  {%endif%}
+		  
+          <!-- Text input-->
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="textinput">First Name</label>
+            <div class="col-sm-10">
+              <input type="text" placeholder="First Name" name="first" class="form-control">
+            </div>
+          </div>
+
+          <!-- Text input-->
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="textinput">Last Name</label>
+            <div class="col-sm-10">
+              <input type="text" placeholder="Last Name" name="last" class="form-control">
+            </div>
+          </div>
+
+          
+          
+          <div class="form-group">
+           <label class="col-sm-2 control-label" for="textinput">Upload image</label>
+           <div class="col-sm-10"><input type="file" accept="image/*" capture="camera" name="image"></div>
+          </div>
+
+
+          <!-- Text input-->
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="textinput">Country of Birth</label>
+            <div class="col-sm-4">
+              <input type="text" placeholder="Country" class="form-control">
+            </div>
+
+            <label class="col-sm-2 control-label" for="textinput">Date of Birth</label>
+            <div class="col-sm-4">
+              <input type="text" placeholder="Post Code" class="form-control">
+            </div>
+            
+            
+          </div>
+		  
+		  
+          <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+              <div class="pull-right">
+                <button type="submit" class="btn btn-default ">Cancel</button>
+                <button type="submit" class="btn btn-primary ladda-button" data-style="expand-left">Submit</button>
+              </div>
+            </div>
+          </div>
+		<input type="hidden"  name="cameraImage" id="cameraImage">
+        <input type="hidden" name="cameraImage2" id="cameraImage2" value="blah">
+        </fieldset>
+        
+      </form>
+    </div><!-- /.col-lg-12 -->
+	<div class="col-md-2" id="camera">
+		<video id="video"></video>
+
+		<br />
+		<br>
+			<br>
+<button id="startbutton">Take photo</button>
+<canvas id="canvas"></canvas>
+<img src="" id="photo" alt="photo">
+	</div>
+</div><!-- /.row -->	
+</body>
+<script>
+
+function isiPhone(){
+    return (
+        //Detect iPhone
+        (navigator.platform.indexOf("iPhone") != -1) ||
+        //Detect iPad
+        (navigator.platform.indexOf("iPad") != -1)
+    );
+}
+if (isiPhone()) document.getElementById("camera").style.display = 'none';
+
+	(function() {
+
+  var streaming = false,
+      video        = document.querySelector('#video'),
+      cover        = document.querySelector('#cover'),
+      canvas       = document.querySelector('#canvas'),
+      photo        = document.querySelector('#photo'),
+      startbutton  = document.querySelector('#startbutton'),
+      width = 200,
+      height = 0;
+
+  navigator.getMedia = ( navigator.getUserMedia || 
+                         navigator.webkitGetUserMedia ||
+                         navigator.mozGetUserMedia ||
+                         navigator.msGetUserMedia);
+
+  navigator.getMedia(
+    { 
+      video: true, 
+      audio: false 
+    },
+    function(stream) {
+      if (navigator.mozGetUserMedia) { 
+        video.mozSrcObject = stream;
+      } else {
+        var vendorURL = window.URL || window.webkitURL;
+        video.src = vendorURL ? vendorURL.createObjectURL(stream) : stream;
+      }
+      video.play();
+    },
+    function(err) {
+      console.log("An error occured! " + err);
+    }
+  );
+
+  video.addEventListener('canplay', function(ev){
+    if (!streaming) {
+      height = video.videoHeight / (video.videoWidth/width);
+      video.setAttribute('width', width);
+      video.setAttribute('height', height);
+      canvas.setAttribute('width', width);
+      canvas.setAttribute('height', height);
+      streaming = true;
+    }
+  }, false);
+
+  function takepicture() {
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext('2d').drawImage(video, 0, 0, width, height);
+    var data = canvas.toDataURL('image/png');
+    photo.setAttribute('src', data);
+	document.getElementById("cameraImage").value = data
+
+  }
+  
+  startbutton.addEventListener('click', function(ev){
+      takepicture();
+    ev.preventDefault();
+  }, false);
+  
+})();
+	
+Ladda.bind( 'button[type=submit]' );
+</script>
+</html>
