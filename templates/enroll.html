@@ -89,7 +89,7 @@ video, img, #startbutton {
             <div class="col-sm-10">
           <select>
 			<option value="all">Idenitification</option>
-			<option value="Drivers Licences">Authentication</option>
+			<option value="Drivers Licences" selected>Authentication</option>
 		</select>
 			</div>
 		  </div>
@@ -123,7 +123,7 @@ video, img, #startbutton {
           <div class="form-group">
             <label class="col-sm-2 control-label" for="textinput">Country of Birth</label>
             <div class="col-sm-4">
-              <input type="text" placeholder="State" class="form-control">
+              <input type="text" placeholder="Country" class="form-control">
             </div>
 
             <label class="col-sm-2 control-label" for="textinput">Date of Birth</label>
@@ -149,8 +149,9 @@ video, img, #startbutton {
         
       </form>
     </div><!-- /.col-lg-12 -->
-	<div class="col-md-2">
+	<div class="col-md-2" id="camera">
 		<video id="video"></video>
+
 		<br />
 		<br>
 			<br>
@@ -161,6 +162,17 @@ video, img, #startbutton {
 </div><!-- /.row -->	
 </body>
 <script>
+
+function isiPhone(){
+    return (
+        //Detect iPhone
+        (navigator.platform.indexOf("iPhone") != -1) ||
+        //Detect iPad
+        (navigator.platform.indexOf("iPad") != -1)
+    );
+}
+if (isiPhone()) document.getElementById("camera").style.display = 'none';
+
 	(function() {
 
   var streaming = false,

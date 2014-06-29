@@ -269,7 +269,12 @@ def bias(**data):
 def deserialize_response(dict_obj_json):
     if dict_obj_json.status_code!=200:
         return {'error':dict_obj_json.reason}
-    result = json.loads(dict_obj_json.json)
+    try:
+      result = json.loads(dict_obj_json.json())
+    except:
+      print '********** ERROR ******'+dict_obj_json.json()
+      raise
+
     if "result" in result:
         return result["result"]
     else:

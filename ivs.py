@@ -128,7 +128,7 @@ class IdentityVerificationService(object):
 
 	@cached_property
 	def read_index(self, ):
-		return open("template/index.html").read()
+		return open("templates/index.html").read()
 	
 	def on_index(self, request ):
 		return Response(self.read_index,mimetype='text/html')
@@ -264,4 +264,4 @@ if __name__ == '__main__':
 	
 	app = create_app(args)
 	
-	run_simple('0.0.0.0', int(args.port), app, use_debugger=True, use_reloader=True, threaded = threaded)
+	run_simple('0.0.0.0', int(args.port), app, use_debugger=True, use_reloader=True, threaded = threaded) #, ssl_context = 'adhoc')
