@@ -239,6 +239,9 @@ if __name__ == '__main__':
 	parser.add_argument('--hub_url','-u', default=False,
 					   help='Set the hub address')
 	
+	parser.add_argument('--no_matcher', default=False,
+					   help='Do not enable matcher')
+	
 	parser.add_argument('--type','-t', default="DLA",
 					   help='Set the type of System (DLA=Drivers Licence, PASS=Passport')
 	parser.add_argument('--country','-c', default="AU",

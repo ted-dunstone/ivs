@@ -436,9 +436,10 @@ class Verify(object):
         if (CONFIG.hub_url):
             # if its a node then add it
             self.hub = create_hub_node_info()
-            print str(send_request(self.hub,
-                                "notify",
-                                get_current_node_info()))
+            if (CONFIG.no_matcher):
+                print str(send_request(self.hub,
+                                    "notify",
+                                    get_current_node_info()))
         
         Q_MGR.createQueue(CONFIG.name+'_incomming')
         Q_MGR.createQueue(CONFIG.name+'_outgoing')
