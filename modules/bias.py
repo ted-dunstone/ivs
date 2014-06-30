@@ -148,10 +148,10 @@ global CONFIG
 
 def log(value,logtype=None,data=None):
     global logdata
-    from time import gmtime, strftime
-    date = strftime("%a, %d %b %Y %H:%M:%S +0000", gmtime());
-    time = strftime("%I:%M:%S %p", gmtime()); 
-    day = strftime("%a, %d %b", gmtime());
+    from time import localtime, strftime
+    date = strftime("%a, %d %b %Y %H:%M:%S +0000", localtime());
+    timestr = strftime("%I:%M:%S %p", localtime()); 
+    day = strftime("%a, %d %b", localtime());
     if logtype=='Add Node':
         classtype = 'info'
         icon = 'plus'
@@ -168,7 +168,7 @@ def log(value,logtype=None,data=None):
         
     print "LOG :"+logtype
     
-    logdata.insert(0,{'date':date,'value':value,'index':len(logdata),'day':day,'time':time,'logtype':logtype,'data':data,'class':classtype,'icon':icon})
+    logdata.insert(0,{'date':date,'value':value,'index':len(logdata),'day':day,'time':timestr,'logtype':logtype,'data':data,'class':classtype,'icon':icon})
 
 from jsonrpc import dispatcher
 def add_node(node_info):
@@ -176,18 +176,19 @@ def add_node(node_info):
     connected_nodes[get_node_display_name(node_info)]=node_info
     print connected_nodes
 
-def storeimage(fname,imgdata):
+def storeimage(fname,imgdata=None):
     local_name = get_node_display_name(Struct(get_current_node_info()))
     data_dir = os.path.join('static','data',local_name)
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
     fullpath = os.path.join(data_dir,fname)
-    open(
-            fullpath,
-               'w'
-        ).write(
-            imgdata
-        )
+    if (imgdata):
+        open(
+                fullpath,
+                   'w'
+            ).write(
+                imgdata
+            )
     return fullpath
         
     
@@ -209,8 +210,10 @@ def matching_servers(node_info,data):
         lw["Score"]=0
         lw["Match"]=False
         
-        lw["ImageUrl"] = storeimage(fname,imgdata)
-    
+        lw["ImageUrl"] = storeimage('upload_'+fname+'.png',imgdata)
+        lw["fname"] = storeimage(fname+'.png')
+        lw["SubjectID"] = fname
+        
         client = BetaFaceAPI()
         if data['BIASOperationName']=='Verify':
             
@@ -220,13 +223,17 @@ def matching_servers(node_info,data):
             
             fr_result = (client.recognize_faces(lw["ImageUrl"], nodename))
             matches = {}
+            
+            key = fname.split('.')[0]
+
             for pid,score in fr_result.iteritems():
-                if (score>=0.8):
+                if (pid.split('.')[0] ==key and score > 0.6):
                     lw["Score"]=score
                     lw["Match"]=True
+                    lw["SubjectID"]=pid
                     matches[pid]=score
             lw["Gallery"]  = str(matches)
-            
+            log(str(matches),"Matching",matches)
             
             print "verify"
         elif data['BIASOperationName']=='Enroll':
@@ -234,7 +241,7 @@ def matching_servers(node_info,data):
 #            client.upload_face(os.path.join(data_dir,fname), subjectID)
             
         
-        log('Underaking Facial Match','Matching',lw)
+        log('Undertaking Facial Match','Matching',lw)
         return VerifySubjectResponse
     
     res={}
@@ -272,8 +279,9 @@ def deserialize_response(dict_obj_json):
     try:
       result = json.loads(dict_obj_json.json())
     except:
-      print '********** ERROR ******'+dict_obj_json.json()
-      raise
+      result = json.loads(dict_obj_json.json)
+#      print '********** ERROR ******'+dict_obj_json.json()
+#      raise
 
     if "result" in result:
         return result["result"]
@@ -421,6 +429,7 @@ class Verify(object):
                         Rule('/enroll', endpoint='enroll'),
                         Rule('/demo/enroll', endpoint='demo_enroll'),
                         Rule('/demo/verify', endpoint='demo_verify'),
+                        Rule('/demo/child', endpoint='demo_child'),
                         Rule('/verify/assert', endpoint='assert'),
                         Rule('/v_request', endpoint='check'),
                         Rule('/log', endpoint='log')]
@@ -457,6 +466,9 @@ class Verify(object):
     def on_demo_verify(self, request):
         return self.service.render_template('enroll.html', config=CONFIG, action={'url':"verify",'name':"Authentication Service"})
     
+    def on_demo_child(self, request):
+        return self.service.render_template('child.html', config=CONFIG, action={'url':"verify",'name':"Authentication Service"})
+    
     def on_log(self, request):
         global logdata
         
@@ -485,12 +497,14 @@ class Verify(object):
 
     def on_verify(self, request):
         import base64,re
+        import random
         print str(request.form.to_dict())
         file = request.files.get('image')
         imgdata = 'None'
         if file:
             imgdata = base64.b64encode(file.read())
             (root, ext) = os.path.splitext(file.filename)
+            imagename = file.filename
             SubjectID= os.path.basename(root)
             print "uploaded file "+str(len(imgdata)) + " "+ SubjectID + " " + ext
         else:
@@ -498,12 +512,16 @@ class Verify(object):
             SubjectID= request.form.get('Identity.SubjectID')
             ext = '.png'
         verifySubjectRequest['Identity']['SubjectID']=SubjectID
+        imagename=storeimage('submit_'+str(random.random())+'_'+SubjectID+ext,base64.b64decode(imgdata))
         
         verifySubjectRequest['Identity']['BiometricData']['BIR']['FormatType']=ext
         verifySubjectRequest['Identity']['BiometricData']['BIR']['BIR']=imgdata
+        
         results =  send_request(self.hub,"bias",verifySubjectRequest)
         
-        return self.service.render_template('results.html', results=results, config=CONFIG)
+        
+        
+        return self.service.render_template('results.html', results=results, config=CONFIG,imagename=imagename)
         
     
     def on_assert(self, request):

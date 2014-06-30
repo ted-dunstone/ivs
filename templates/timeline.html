@@ -3,10 +3,10 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-	<meta http-equiv="refresh" content="1">
+	<meta http-equiv="refresh" content="5">
     <title>Log {{config.name}}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link rel="stylesheet" href="/static/js/css/bootstrap.min.css" />
     <style type="text/css">
     
 img
@@ -300,7 +300,7 @@ img
     <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
 </head>
 <body>
-		<h1>{{config.name}}</h1>
+		<h3><center> Transaction Log : {{config.name}}</center></h3>
 
 
 	<div class="container">
@@ -321,14 +321,16 @@ img
 			
 			<div class="timeline-label">
 				<h2><a href="#">{{ entry.logtype }}</a> <span>{{ entry.value }}</span></h2>
-				{%if '_node' in entry.data %}
-				<p><img width=200 src={{ entry.data._node.logo }} align="right"></img></p>
+				{%if 'fname' in entry.data %}
+				<p><img width=200 src="{{ entry.fname }}" align="right"></img></p>
 				{%endif%}
 				<p>{{ entry.value }}</p>
 				{%if 'ImageUrl' in entry.data %}
-				<p><img width=200 src={{ entry.data.ImageUrl }}></img></p>
+				<p><img width=180 src="{{ entry.data.ImageUrl }}"></img>
+				<img width=180 src="{{ entry.data.fname }}"></img></p>
 				<p>Match: {{entry.data.Match}} </p>
 				<p>Score: {{entry.data.Score}} </p>
+				<p>ID: {{entry.data.SubjectID}} </p>
 				{%endif%}
 				
 				<!--blockquote>Pianoforte principles our unaffected not for astonished travelling are particular.</blockquote-->
