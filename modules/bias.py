@@ -240,7 +240,7 @@ def matching_servers(node_info,data):
     res={}
     node_url = get_node_url(node_info)
     for node_name,info in connected_nodes.items():
-        if (node_url != get_node_url(info) and not info.no_matcher):
+        if (node_url != get_node_url(info)):
             print ".. sending to "+node_name
             res[node_name]=send_request(info,"bias",data)
     print str(res)
