@@ -240,7 +240,7 @@ def matching_servers(node_info,data):
     res={}
     node_url = get_node_url(node_info)
     for node_name,info in connected_nodes.items():
-        if (node_url != get_node_url(info)):
+        if (node_url != get_node_url(info) and not info.no_matcher):
             print ".. sending to "+node_name
             res[node_name]=send_request(info,"bias",data)
     print str(res)
@@ -436,8 +436,7 @@ class Verify(object):
         if (CONFIG.hub_url):
             # if its a node then add it
             self.hub = create_hub_node_info()
-            if (CONFIG.no_matcher):
-                print str(send_request(self.hub,
+            print str(send_request(self.hub,
                                     "notify",
                                     get_current_node_info()))
         
