@@ -2,9 +2,24 @@
 
 
 echo "BEGINNING TESTS....."
+
 echo "TEST 1"
 
-python convert_NIST_finger.py -i Test1.eft  -f bmp -o Tes 
+python convert_NIST_finger.py -i Test1.eft  -f bmp -o Test1_new.eft 2>&1 | grep TEST
+
+echo "TEST 2"
+
+python convert_NIST_finger.py -i Test2.eft  -f bmp -o Test2_new.eft 2>&1 | grep TEST
+
+echo "TEST 3"
+
+python convert_NIST_finger.py -i Test3.eft  -f bmp -o Test3_new.eft 2>&1 | grep TEST
+
+echo "TEST 4"
+
+python convert_NIST_finger.py -i Test4.eft  -f bmp -o Test4_new.eft 2>&1 | grep TEST
+
+echo "TEST 5"
 
 python convert_NIST_finger.py -i Test5.eft  -f bmp -o Test5_new.eft 2>&1 | grep TEST
 

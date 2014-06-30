@@ -93,6 +93,8 @@ def main(argv):
    full_values = [] 
    img_x=-1
    img_y=-1
+
+   type_14=0;
    
    #Open txt field file and parse fields/records
    with open(dir_path+"/"+in_file[0:len(in_file)-4]+".fmt", 'rw') as fmt_file:
@@ -132,7 +134,14 @@ def main(argv):
 #            full_records[splitLine[0]] = ",".join(splitLine[1:])
 #            full_records[splitLine[0]] = ",".join([new_val])
             full_records.append(splitLine[0])
+            
+            #Test to see if Type 14
+            if field_num=="1.3.5.1" and field_val=="14":
+               type_14=1
+               print("Type 14 record detected") 
+
             full_values.append(new_val)
+
         fmt_file.close()
         
    with open(dir_path+"/"+in_file[0:len(in_file)-4]+".new.fmt", 'w') as fmt_out_file:
@@ -158,10 +167,10 @@ def main(argv):
    os.system("mv *.jpg" +" "+dir_path+"/" )
    os.system("mv *."+out_format +" "+dir_path+"/" )
 
-   if not '1.005' in records.keys():
+   if (not '1.5.1.1 [1.005]' in full_records) and type_14==0:
       print("TEST FAILED. Missing date field 1.005")      
 #      print records.keys();
-   elif not '14.002' in records.keys():
+   elif (not "11.2.1.1 [14.002]" in full_records) and type_14==1:
       print("TEST FAILED. Missing IDC field 14.002")
    else:
       print("TEST PASSED")
