@@ -39,7 +39,7 @@
                 <div class="text">
                     {%if results[key]['VerifySubjectResponsePackage']['Match']%}
                      <var>Match</var>
-                            <label class="text-muted">{{results[key]['VerifySubjectResponsePackage']['Gallery']}}</label>
+                            <label class="text-muted">Score: {{results[key]['VerifySubjectResponsePackage']['Score']}}</label>
                     {%else%}
                      <var>No Match</var>
                     {%endif%}
@@ -51,7 +51,7 @@
                     -->
                     <br>
                     <br>
-                    <img src='{{results[key]['VerifySubjectResponsePackage']['ImageUrl']}}' width=150>
+                    <img src='{{imagename}}' width=150>
                 </div>
                 <div class="options">
                     <a href="javascript:;" class="btn btn-primary btn-lg"><i class="glyphicon glyphicon-plus"></i> Request Info</a>
