@@ -13,6 +13,8 @@ sudo apt-get install redis-server
 sudo apt-get install python-numpy python-scipy
 sudo apt-get install rabbitmq-server
 
+sudo apt-get install convert
+sudo apt-get install rawtopgm
 
 sudo rabbitmq-plugins enable rabbitmq_management
 sudo rabbitmq-plugins enable rabbitmq_management_visualiser
