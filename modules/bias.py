@@ -505,7 +505,8 @@ class Verify(object):
             imgdata = base64.b64encode(file.read())
             (root, ext) = os.path.splitext(file.filename)
             imagename = file.filename
-            SubjectID= os.path.basename(root)
+            SubjectID= request.form.get('Identity.SubjectID')
+            #SubjectID= os.path.basename(root)
             print "uploaded file "+str(len(imgdata)) + " "+ SubjectID + " " + ext
         else:
             imgdata=re.search(r'base64,(.*)', request.form['cameraImage']).group(1)
