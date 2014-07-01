@@ -18,6 +18,9 @@ import getopt
 import shutil
 
 
+#NIST binary path
+nist_path="NIST_linux_x86_64_binary/"
+
 #define X-Y coordinate NIST fields
 x_dim_fields=["3.6.1.1", "4.6.1.1", "5.6.1.1", "6.6.1.1",
                  "7.6.1.1", "8.6.1.1", "9.6.1.1", "10.6.1.1", "11.6.1.1", "12.6.1.1",]
@@ -69,6 +72,8 @@ def main(argv):
    print("Output format is "+ out_format)
    print("Output file is "+ out_file)
 
+   in_file_name=in_file[max(0, in_file.rfind('/')+1):len(in_file)-4]
+
    if os.path.exists(dir_path):
    #   os.removedirs(dir_path)
       shutil.rmtree(dir_path)   
@@ -83,8 +88,8 @@ def main(argv):
       sys.exit(1)
       
    #Produce NIST formatted field and raw image output   
-   print("Running "+"an2k2txt "+in_file+ " "+dir_path+"/"+in_file[0:len(in_file)-4]+".fmt")
-   os.system("an2k2txt "+in_file+ " "+dir_path+"/"+in_file[0:len(in_file)-4]+".fmt")   
+   print("Running "+nist_path+"an2k2txt "+in_file+ " "+dir_path+"/"+in_file_name+".fmt")
+   os.system(nist_path+"an2k2txt "+in_file+ " "+dir_path+"/"+in_file_name+".fmt")   
    
    
    #Read the text file into a list
@@ -97,7 +102,7 @@ def main(argv):
    type_14=0;
    
    #Open txt field file and parse fields/records
-   with open(dir_path+"/"+in_file[0:len(in_file)-4]+".fmt", 'rw') as fmt_file:
+   with open(dir_path+"/"+in_file_name+".fmt", 'rw') as fmt_file:
         for line in fmt_file:
             splitLine = line.split('=')
             
@@ -144,7 +149,7 @@ def main(argv):
 
         fmt_file.close()
         
-   with open(dir_path+"/"+in_file[0:len(in_file)-4]+".new.fmt", 'w') as fmt_out_file:
+   with open(dir_path+"/"+in_file_name+".new.fmt", 'w') as fmt_out_file:
   #      for key, value in full_records.iteritems():
 #        for key in sorted(full_records):
 #             print(key+"="+value)         
@@ -154,11 +159,11 @@ def main(argv):
 
    
    if out_file !='':         
-      os.system("txt2an2k "+dir_path+"/"+in_file[0:len(in_file)-4]+".new.fmt" +" "+out_file) 
-      print("txt2an2k "+dir_path+"/"+in_file[0:len(in_file)-4]+".new.fmt" +" "+out_file)
+      os.system(nist_path+"txt2an2k "+dir_path+"/"+in_file_name+".new.fmt" +" "+out_file) 
+      print(nist_path+"txt2an2k "+dir_path+"/"+in_file_name+".new.fmt" +" "+out_file)
    else:         
-      os.system("txt2an2k "+dir_path+"/"+in_file[0:len(in_file)-4]+".new.fmt" +" "+"new.eft") 
-      print("txt2an2k "+dir_path+"/"+in_file[0:len(in_file)-4]+".new.fmt" +" "+"new.eft")
+      os.system(nist_path+"txt2an2k "+dir_path+"/"+in_file_name+".new.fmt" +" "+"new.eft") 
+      print(nist_path+"txt2an2k "+dir_path+"/"+in_file_name+".new.fmt" +" "+"new.eft")
    
 
    #Cleanup images      
