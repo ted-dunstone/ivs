@@ -16,6 +16,8 @@ import os
 import sys
 import getopt
 import shutil
+import json
+import subprocess
 
 
 #NIST binary path
@@ -32,11 +34,11 @@ y_dim_fields=["3.7.1.1", "4.7.1.1", "5.7.1.1", "6.7.1.1",
 #valid image formats for transformation
 valid_image_formats=["jpg", "jpeg", "bmp", "png", "wsq", "tiff"]
 
-
 def main(argv):
    in_file = ''
    out_format = ''
    out_file=''
+   NFIQs={}
    
    try:
       opts, args = getopt.getopt(argv,"hi:f:o:",["ifile=","ofile=","format="])
@@ -131,11 +133,20 @@ def main(argv):
                   print("convert -quality 100 "+field_val[0:len(field_val)-3]+"pgm"+ " " + field_val[0:len(field_val)-3]+"jpg")
                   os.system("convert -quality 100 "+field_val[0:len(field_val)-3]+"pgm"+ " " + field_val[0:len(field_val)-3]+"jpg")
                   os.system("convert -quality 100 "+field_val[0:len(field_val)-3]+"pgm"+ " " + field_val[0:len(field_val)-3]+out_format)
+
+                  #Extract minutiae and orientation flow information
+                  os.system(nist_path+"mindtct  -b  -m1 "+field_val[0:len(field_val)-3]+"jpg" +" "+field_val[0:len(field_val)-4]) 
+
+                  #Extract NFIQ score
+                  proc = subprocess.Popen([nist_path+"nfiq -d "+ field_val[0:len(field_val)-3]+"jpg" ], stdout=subprocess.PIPE, shell=True)
+                  (nfiq, err) = proc.communicate()
+                  print("NFIQ is "+nfiq)
+
                   img_x=-1
                   img_y=-1
 #                  os.system("mv "+ field_val[0:len(field_val)-3]+out_format+ " "+dir_path+"/" )   
                
-            records[field_num] = ",".join(field_val)
+            records[field_num] = field_val
 #            full_records[splitLine[0]] = ",".join(splitLine[1:])
 #            full_records[splitLine[0]] = ",".join([new_val])
             full_records.append(splitLine[0])
@@ -170,6 +181,15 @@ def main(argv):
    os.system("rm *.pgm")
    os.system("rm *.tmp")
    os.system("mv *.jpg" +" "+dir_path+"/" )
+   os.system("mv *.brw" +" "+dir_path+"/" )
+   os.system("mv *.hcm" +" "+dir_path+"/" )
+   os.system("mv *.lcm" +" "+dir_path+"/" )
+   os.system("mv *.xyt" +" "+dir_path+"/" )
+   os.system("mv *.min" +" "+dir_path+"/" )
+   os.system("mv *.dm" +" "+dir_path+"/" )
+   os.system("mv *.qm" +" "+dir_path+"/" )
+   os.system("mv *.lfm" +" "+dir_path+"/" )
+   os.system("mv *.nfiq" +" "+dir_path+"/" )
    os.system("mv *."+out_format +" "+dir_path+"/" )
 
    if (not '1.5.1.1 [1.005]' in full_records) and type_14==0:
@@ -180,7 +200,12 @@ def main(argv):
    else:
       print("TEST PASSED")
 
+   json_dict={"NFIQ":1, "Fields": records}
 
+   print records['1.5.1.1']   
+   with open(dir_path + '/'+'json.txt', 'w') as outfile:
+        json.dump(json_dict, outfile)
+   
 
       
 #print sys.argv[1:]   
