@@ -297,6 +297,7 @@ def main(argv):
             rec_num=(splitLine[0])[:splitLine[0].find("[")-1]              
             field_num=((splitLine[0])[splitLine[0].find("["):]).replace('[','').replace(']','')              
             field_val=(splitLine[1])[:len(splitLine[1])-2]           
+            new_val=(splitLine[1])
             print("Field number is "+field_num +" Record number is "+rec_num +" field value is "+field_val)
 
             if(field_num in x_dim_fields):
@@ -314,12 +315,10 @@ def main(argv):
                finger_index=int(field_val  )
                print("Finger INDEX is "+str(finger_index))
             
-            new_val=field_val
             if(".tmp" in splitLine[1:][0]):
                print("Found image file "+splitLine[1:][0])
                splitLine[1:][0]=(splitLine[1:][0]).replace(".tmp", "."+out_format)
                new_val=(splitLine[1:][0]).replace(".tmp", "."+out_format)
-               new_val=new_val[:len(new_val)-2]
                if(img_x!=-1 and img_y!=-1):
                   print("rawtopgm "+str(img_x)+ " "+str(img_y) + " "+ field_val + " > " + field_val[0:len(field_val)-3]+"pgm")   
                   os.system("rawtopgm "+str(img_x)+ " "+str(img_y) +" "+ field_val + " > " + field_val[0:len(field_val)-3]+"pgm")   
@@ -346,7 +345,7 @@ def main(argv):
                   img_y=-1
 #                  os.system("mv "+ field_val[0:len(field_val)-3]+out_format+ " "+dir_path+"/" )   
                
-            records[rec_num] = {"field":field_num, "value":new_val}
+            records[rec_num] = {"field":field_num, "value":new_val[:len(new_val)-2]}
 #            full_records[splitLine[0]] = ",".join(splitLine[1:])
 #            full_records[splitLine[0]] = ",".join([new_val])
             full_records.append(splitLine[0])
