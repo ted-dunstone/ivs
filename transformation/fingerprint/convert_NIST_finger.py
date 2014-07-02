@@ -345,7 +345,7 @@ def main(argv):
                   img_y=-1
 #                  os.system("mv "+ field_val[0:len(field_val)-3]+out_format+ " "+dir_path+"/" )   
                
-            records[field_num] = {"field":field_val, "value":new_val}
+            records[rec_num] = {"field":field_num, "value":new_val}
 #            full_records[splitLine[0]] = ",".join(splitLine[1:])
 #            full_records[splitLine[0]] = ",".join([new_val])
             full_records.append(splitLine[0])
