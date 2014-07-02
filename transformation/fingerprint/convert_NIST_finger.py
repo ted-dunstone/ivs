@@ -193,11 +193,9 @@ def getMinutiae(path, finger_name):
                         line=line.replace(';',',')
                         fields = line.split(',')
 
-                        m_type=1
-                        if fields[5].strip()=="BIF":
-                                m_type=3
+                        m_type=fields[5].strip()
                             
-                        if float(fields[4]) < MIN_Q:# or int(fields[1]) > 665 and int(fields[2]) < 170:
+                        if float(fields[4]) < MIN_Q:
                                 continue
                         ang_m_list[int(fields[1])*1000 + int(fields[2])]=float(fields[3])*11.25 * float(np.pi) / 180.0
                         ## <index> <x><y><normalised x>, <normalised y>, direction,  quality, type                                      
