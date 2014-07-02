@@ -9,7 +9,7 @@ Created on Sun Jun 29 22:44:23 2014
               python convert_NIST_finger.py -i <input_file>  -f <image_format> [-o <output_file>]
 
               e.g. python convert_NIST_finger.py -i file.eft  -f wsq file_new.eft
-              
+               
 """
 
 import os
