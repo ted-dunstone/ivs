@@ -6,7 +6,7 @@ sudo easy_install redis
 sudo easy_install jinja2
 sudo easy_install pika
 sudo easy_install json-rpc
-
+sudo easy_install requests
 sudo add-apt-repository ppa:rwky/redis
 sudo apt-get update
 sudo apt-get install redis-server
