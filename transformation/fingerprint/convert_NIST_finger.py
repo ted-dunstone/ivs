@@ -319,6 +319,7 @@ def main(argv):
                print("Found image file "+splitLine[1:][0])
                splitLine[1:][0]=(splitLine[1:][0]).replace(".tmp", "."+out_format)
                new_val=(splitLine[1:][0]).replace(".tmp", "."+out_format)
+               new_val=new_val[:len(new_val)-2]
                if(img_x!=-1 and img_y!=-1):
                   print("rawtopgm "+str(img_x)+ " "+str(img_y) + " "+ field_val + " > " + field_val[0:len(field_val)-3]+"pgm")   
                   os.system("rawtopgm "+str(img_x)+ " "+str(img_y) +" "+ field_val + " > " + field_val[0:len(field_val)-3]+"pgm")   
