@@ -289,7 +289,7 @@ def main(argv):
    img_x=-1
    img_y=-1
 
-   type_14=0;
+   type_14=-1;
    finger_index=-1
    compression_algorithm=0
 
@@ -297,6 +297,8 @@ def main(argv):
    finger_source_agency="" #      "14.004":"SOURCE AGENCY/ORI",
    finger_capture_date="" #        "14.005":"TENPRINT CAPTURE DATE",
    finger_comment=""      #           "14.020":"COMMENT",
+   idc=""                # "14.002":"IMAGE DESIGNATION CHARACTER",
+   
 
 
    #Open txt field file and parse fields/records
@@ -324,10 +326,11 @@ def main(argv):
             print(splitLine[1:][0])
             new_val=splitLine[1:][0]
 
-
             if(field_num in ("4.005","14.012")):
                finger_dpi=field_val
                
+            if(field_num in ("14.002")):
+               idc=field_val 
             if(field_num in ("14.004")):
                finger_source_agency=field_val
             if(field_num in ("14.005")):
@@ -377,11 +380,18 @@ def main(argv):
                      print("NFIQ is "+nfiq)
                      print("Finger index is "+str(finger_index))
                      NFIQs[finger_index]=int(nfiq[0:len(nfiq)-1])
-
+   
+                  record_type="Unknown"
+                  if type_14==1:
+                     record_type="14"
+                  elif type_14==0:
+                     record_type="4"
+                     
                   fingers[finger_index]={"finger":finger_position_codes[str(finger_index)], "x":img_x, 
                                          "y":img_y, "compressed":compression_algorithm, 
                                          "source agency":finger_source_agency, "capture date":finger_capture_date,
-                                         "comment":finger_comment, "dpi":finger_dpi, "minutiae":getMinutiae("", field_val[0:len(field_val)-4])}     
+                                         "comment":finger_comment, "dpi":finger_dpi, "minutiae":getMinutiae("", field_val[0:len(field_val)-4]), "NFIQ":NFIQs[finger_index], "IDC":idc, 
+                                        "Record type":record_type}     
                                          
                   print fingers[finger_index]
                                          
@@ -389,7 +399,7 @@ def main(argv):
                   finger_source_agency="" #      "14.004":"SOURCE AGENCY/ORI",
                   finger_capture_date="" #        "14.005":"TENPRINT CAPTURE DATE",
                   finger_comment=""     
-                  
+                  idc=""            #     "14.002":"IMAGE DESIGNATION CHARACTER",
                   img_x=-1
                   img_y=-1
 #                  os.system("mv "+ field_val[0:len(field_val)-3]+out_format+ " "+dir_path+"/" )   
