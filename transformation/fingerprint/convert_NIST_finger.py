@@ -9,7 +9,7 @@ Created on Sun Jun 29 22:44:23 2014
               python convert_NIST_finger.py -i <input_file>  -f <image_format> [-o <output_file>]
 
               e.g. python convert_NIST_finger.py -i file.eft  -f wsq file_new.eft
-               
+              
 """
 
 import os
@@ -109,6 +109,9 @@ y_dim_recs=["3.7.1.1", "4.7.1.1", "5.7.1.1", "6.7.1.1",
 x_dim_fields=["4.006", "14.006",]
                  
 y_dim_fields=["4.007", "14.007",]
+
+#valid image formats for transformation
+valid_image_formats=["jpg", "jpeg", "bmp", "png", "wsq", "tiff"]
 
 
 
@@ -212,9 +215,6 @@ def getMinutiae(path, finger_name):
 
 
 
-#valid image formats for transformation
-valid_image_formats=["jpg", "jpeg", "bmp", "png", "wsq", "tiff"]
-
 def main(argv):
    in_file = ''
    out_format = ''
@@ -260,6 +260,7 @@ def main(argv):
       print("Attempting to clean/remove directory "+dir_path)
       shutil.rmtree(dir_path)   
       try:
+          os.system("rm *.tmp")
           os.removedirs(dir_path)
       except:
           pass
@@ -288,7 +289,8 @@ def main(argv):
 
    type_14=0;
    finger_index=-1
-   
+   compression_algorithm=0
+
    #Open txt field file and parse fields/records
    with open(dir_path+"/"+in_file_name+".fmt", 'rw') as fmt_file:
         for line in fmt_file:
@@ -314,18 +316,31 @@ def main(argv):
             if field_num=="14.002" and type_14==1 or field_num=="4.002" and type_14==0:
                finger_index=int(field_val  )
                print("Finger INDEX is "+str(finger_index))
+
+            if field_num=="4.008" or field_num=="14.011":   
+               try: 
+                   compression_algorithm=int(field_val  )              
+               except:
+                   pass
             
             if(".tmp" in splitLine[1:][0]):
                print("Found image file "+splitLine[1:][0])
                splitLine[1:][0]=(splitLine[1:][0]).replace(".tmp", "."+out_format)
                new_val=(splitLine[1:][0]).replace(".tmp", "."+out_format)
                if(img_x!=-1 and img_y!=-1):
+                  if compression_algorithm==0: 
+                     pass 
+                  elif compression_algorithm==1:   
+                                 #dwsq raw fld_8_9.tmp -raw
+                     print("dwsq tmp "+ field_val + " -raw " )   
+                     os.system("dwsq tmp "+ field_val + " -raw " )   
+                     
                   print("rawtopgm "+str(img_x)+ " "+str(img_y) + " "+ field_val + " > " + field_val[0:len(field_val)-3]+"pgm")   
                   os.system("rawtopgm "+str(img_x)+ " "+str(img_y) +" "+ field_val + " > " + field_val[0:len(field_val)-3]+"pgm")   
                   print("convert -quality 100 "+field_val[0:len(field_val)-3]+"pgm"+ " " + field_val[0:len(field_val)-3]+"jpg")
                   os.system("convert -quality 100 "+field_val[0:len(field_val)-3]+"pgm"+ " " + field_val[0:len(field_val)-3]+"jpg")
                   os.system("convert -quality 100 "+field_val[0:len(field_val)-3]+"pgm"+ " " + field_val[0:len(field_val)-3]+out_format)
-
+                                 
                   #Extract minutiae and orientation flow information
                   os.system(nist_path+"mindtct  -b  -m1 "+field_val[0:len(field_val)-3]+"jpg" +" "+field_val[0:len(field_val)-4]) 
                   minutiae[field_val[0:len(field_val)-4]]=getMinutiae("", field_val[0:len(field_val)-4])
@@ -372,7 +387,6 @@ def main(argv):
          for i in range(0,len(full_records)):
             fmt_out_file.write(full_records[i]+"="+full_values[i])
 
-
    
    if out_file !='':         
       os.system(nist_path+"txt2an2k "+dir_path+"/"+in_file_name+".new.fmt" +" "+out_file) 
@@ -383,8 +397,10 @@ def main(argv):
    
 
    #Cleanup images      
-   os.system("rm *.pgm")
    os.system("rm *.tmp")
+   os.system("rm *.pgm")
+   os.system("rm *.ncm")
+#   os.system("rm *.tmp")
    os.system("mv *.jpg" +" "+dir_path+"/" )
    os.system("mv *.brw" +" "+dir_path+"/" )
    os.system("mv *.hcm" +" "+dir_path+"/" )
