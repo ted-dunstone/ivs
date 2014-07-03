@@ -298,7 +298,7 @@ def main(argv):
    finger_capture_date="" #        "14.005":"TENPRINT CAPTURE DATE",
    finger_comment=""      #           "14.020":"COMMENT",
    idc=""                # "14.002":"IMAGE DESIGNATION CHARACTER",
-   
+   image_name=""
 
 
    #Open txt field file and parse fields/records
@@ -391,7 +391,7 @@ def main(argv):
                                          "y":img_y, "compressed":compression_algorithm, 
                                          "source agency":finger_source_agency, "capture date":finger_capture_date,
                                          "comment":finger_comment, "dpi":finger_dpi, "minutiae":getMinutiae("", field_val[0:len(field_val)-4]), "NFIQ":NFIQs[finger_index], "IDC":idc, 
-                                        "Record type":record_type}     
+                                        "Record type":record_type, "image":field_val[0:len(field_val)-3]+"jpg"}     
                                          
                   print fingers[finger_index]
                                          
