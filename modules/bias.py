@@ -11,7 +11,7 @@ import base64
 
 class BiasEncoder(JSONEncoder):
     def default(self, o):
-        return o.__dict__    
+        return o.__dict__
 
 #d_named = namedtuple('Struct', verify_obj.keys())(*verify_obj.values())
 
@@ -95,38 +95,38 @@ ResponseStatus={
 }
 
 
-verifySubjectRequest={   
+verifySubjectRequest={
     "GenericRequestParameters":GenericRequestParameters,
-    
+
     "BIASOperationName":"Verify",
-    
+
      "GalleryID": {
        "galleries":["12","23","2323","2323"]
     },
-        
+
     "ProcessingOptions": {
        "Options":{}
     },
-    "Identity":BIASIdentity,   
+    "Identity":BIASIdentity,
     "InputData":{},
-    
+
 }
 
-enrollSubjectRequest={   
+enrollSubjectRequest={
     "GenericRequestParameters":GenericRequestParameters,
-    
+
     "BIASOperationName":"Enroll",
-    
+
      "GalleryID": {
        "galleries":["12","23","2323","2323"]
     },
-        
+
     "ProcessingOptions": {
        "Options":{}
     },
-    "Identity":BIASIdentity,   
+    "Identity":BIASIdentity,
     "InputData":{},
-    
+
 }
 
 VerifySubjectResponse={
@@ -138,7 +138,7 @@ VerifySubjectResponse={
 }
 
 #####################
-    
+
 connected_nodes = {}
 logdata = []
 
@@ -150,7 +150,7 @@ def log(value,logtype=None,data=None):
     global logdata
     from time import localtime, strftime
     date = strftime("%a, %d %b %Y %H:%M:%S +0000", localtime());
-    timestr = strftime("%I:%M:%S %p", localtime()); 
+    timestr = strftime("%I:%M:%S %p", localtime());
     day = strftime("%a, %d %b", localtime());
     if logtype=='Add Node':
         classtype = 'info'
@@ -164,17 +164,20 @@ def log(value,logtype=None,data=None):
     else:
         classtype = 'warning'
         icon =''
-        
-        
+
+
     print "LOG :"+logtype
-    
+
     logdata.insert(0,{'date':date,'value':value,'index':len(logdata),'day':day,'time':timestr,'logtype':logtype,'data':data,'class':classtype,'icon':icon})
 
 from jsonrpc import dispatcher
+
+
 def add_node(node_info):
     global connected_nodes
-    connected_nodes[get_node_display_name(node_info)]=node_info
+    connected_nodes[get_node_display_name(node_info)] = node_info
     print connected_nodes
+
 
 def storeimage(fname,imgdata=None):
     local_name = get_node_display_name(Struct(get_current_node_info()))
@@ -190,40 +193,40 @@ def storeimage(fname,imgdata=None):
                 imgdata
             )
     return fullpath
-        
-    
+
+
 
 def matching_servers(node_info,data):
     global connected_nodes, CONFIG
 
     print "OPERATION "+data['BIASOperationName']
-    
+
     if (len(connected_nodes)<2):
-        
+
         subjectID = data['Identity']['SubjectID']
 
         nodename = get_node_display_name(Struct(get_current_node_info()))
         fname = subjectID # + data['Identity']['BiometricData']['BIR']['FormatType']
         imgdata = base64.b64decode(data['Identity']['BiometricData']['BIR']['BIR'])
-        
+
         lw = VerifySubjectResponse["VerifySubjectResponsePackage"]
         lw["Score"]=0
         lw["Match"]=False
-        
+
         lw["ImageUrl"] = storeimage('upload_'+fname+'.png',imgdata)
         lw["fname"] = storeimage(fname+'.png')
         lw["SubjectID"] = fname
-        
+
         client = BetaFaceAPI()
         if data['BIASOperationName']=='Verify':
-            
+
             print lw["ImageUrl"]
             print  '@'+nodename
             print len(open(lw["ImageUrl"]).read())
-            
+
             fr_result = (client.recognize_faces(lw["ImageUrl"], nodename))
             matches = {}
-            
+
             key = fname.split('.')[0]
 
             for pid,score in fr_result.iteritems():
@@ -234,16 +237,16 @@ def matching_servers(node_info,data):
                     matches[pid]=score
             lw["Gallery"]  = str(matches)
             log(str(matches),"Matching",matches)
-            
+
             print "verify"
         elif data['BIASOperationName']=='Enroll':
             print "enroll"
 #            client.upload_face(os.path.join(data_dir,fname), subjectID)
-            
-        
+
+
         log('Undertaking Facial Match','Matching',lw)
         return VerifySubjectResponse
-    
+
     res={}
     node_url = get_node_url(node_info)
     for node_name,info in connected_nodes.items():
@@ -304,11 +307,11 @@ def get_node_display_name(node):
 
 def send_request(node,service,dict_obj):
     global CONFIG
-    Q_MGR.push(get_current_node_info()['name']+'_outgoing',dict_obj) 
-    
+    Q_MGR.push(get_current_node_info()['name']+'_outgoing',dict_obj)
+
     headers = {'content-type': 'application/json'}
     print "="*40
-    
+
     dict_obj["_node"]=  get_current_node_info()
 
     log("sending to "+get_node_display_name(node),"Send Data",dict_obj)
@@ -319,10 +322,10 @@ def send_request(node,service,dict_obj):
         "jsonrpc": "2.0",
         "id": 0,
     }
-    
+
     response = requests.post(
        get_node_url(node), data=json.dumps(payload), headers=headers)
-    
+
     log("received data from "+get_node_display_name(node),"Received Data",dict_obj)
     #log("received data from "+get_node_display_name(node))
 
@@ -341,22 +344,22 @@ class Struct(object):
         self.__data = data
 
     def _wrap(self, value):
-        if isinstance(value, (tuple, list, set, frozenset)): 
+        if isinstance(value, (tuple, list, set, frozenset)):
             return type(value)([self._wrap(v) for v in value])
         else:
             return Struct(value) if isinstance(value, dict) else value
-    
+
     def data(self, ):
         return self.__data
-    
+
 
 def get_current_node_info():
     return {
-                "url":None,        
+                "url":None,
                 "port":CONFIG.port,
                 'host':socket.gethostname(),
                 'type':CONFIG.type,
-                'country':CONFIG.country,            
+                'country':CONFIG.country,
                 'location':CONFIG.location,
                 'name':CONFIG.name,
                 'logo':CONFIG.logo,
@@ -375,55 +378,56 @@ class HubQueue(object):
         self.queueName = queueName
         self.channel = channel
         self.exchange = exchange
-    
+
     def create(self):
         self.channel.queue_declare(queue=self.queueName)
-        
+
     def push(self, contents):
         return self.channel.basic_publish(exchange=self.exchange,
                       routing_key=self.queueName,
                       body=str(contents))
-    
+
     def pull(self):
         for method_frame, properties, body in self.channel.consume(self.queueName):
             # Display the message parts and ack the message
             #print method_frame, properties, body
-            channel.basic_ack(method_frame.delivery_tag)
+            self.channel.basic_ack(method_frame.delivery_tag)
             return body
             # Escape out of the loop after 10 messages
             #if method_frame.delivery_tag == 10:
             #    break
 
-    
+
 
 class QueueManager(object):
-    
-    def __init__(self, ):
+
+    def __init__(self, exchange):
         logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.CRITICAL)
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(
         host='localhost'))
         self.channel = self.connection.channel()
         self.queues = {}
-        
+        self.exchange = exchange
+
     def createQueue(self, queueName):
-        q = HubQueue(queueName, self.channel)
+        q = HubQueue(queueName, self.channel, self.exchange)
         q.create()
-        self.queues[queueName]=q
-        
+        self.queues[queueName] = q
+
     def push(self, queueName, contents):
         if queueName not in self.queues:
             self.createQueue(queueName)
         self.queues[queueName].push(contents)
 
     def pull(self, queueName):
-        return self.queues[queueName].pull(contents)
-    
+        return self.queues[queueName].pull()
 
-    
-    
+
+
+
 
 class Verify(object):
-    
+
     def __init__(self,CONFIG_IN, service):
         self.url_map = [Rule('/verify', endpoint='verify'),
                         Rule('/enroll', endpoint='enroll'),
@@ -436,49 +440,48 @@ class Verify(object):
         global CONFIG
         CONFIG = CONFIG_IN
         global Q_MGR
-        Q_MGR = QueueManager()
-        
+        Q_MGR = QueueManager('OBTB')
         self.service = service
         self.redis = service.redis
-        
-        
+
+
         if (CONFIG.hub_url):
             # if its a node then add it
             self.hub = create_hub_node_info()
             print str(send_request(self.hub,
                                     "notify",
                                     get_current_node_info()))
-        
+
         Q_MGR.createQueue(CONFIG.name+'_incomming')
         Q_MGR.createQueue(CONFIG.name+'_outgoing')
-        
+
     def on_verify(self, request):
         print str(request.args.keys())
         #receive_dict(request.args)
         return {'verify':True}
-    
+
     def on_upload(self, ):
         pass
-    
+
     def on_demo_enroll(self, request):
         return self.service.render_template('enroll.html', config=CONFIG, action={'url':"enroll",'name':"Enrolment Service"})
-    
+
     def on_demo_verify(self, request):
         return self.service.render_template('enroll.html', config=CONFIG, action={'url':"verify",'name':"Authentication Service"})
-    
+
     def on_demo_child(self, request):
         return self.service.render_template('child.html', config=CONFIG, action={'url':"verify",'name':"Authentication Service"})
-    
+
     def on_log(self, request):
         global logdata
-        
-        
+
+
         return self.service.render_template('timeline.html', log=logdata,config=CONFIG)
-        
+
 
     def on_check(self, request):
         return send_request(self.hub,"bias",verifySubjectRequest)
-    
+
     def on_enroll(self, request):
         import base64, re
         file = request.files.get('image')
@@ -493,7 +496,7 @@ class Verify(object):
             fullpath = storeimage(SubjectID,base64.b64decode(imgdata))
             client.upload_face(fullpath,  SubjectID+'@'+nodename)
         return self.on_demo_enroll(request)
-        
+
 
     def on_verify(self, request):
         import base64,re
@@ -513,18 +516,18 @@ class Verify(object):
             ext = '.png'
         verifySubjectRequest['Identity']['SubjectID']=SubjectID
         imagename=storeimage('submit_'+str(random.random())+'_'+SubjectID+ext,base64.b64decode(imgdata))
-        
+
         verifySubjectRequest['Identity']['BiometricData']['BIR']['FormatType']=ext
         verifySubjectRequest['Identity']['BiometricData']['BIR']['BIR']=imgdata
-        
+
         results =  send_request(self.hub,"bias",verifySubjectRequest)
-        
-        
-        
+
+
+
         return self.service.render_template('results.html', results=results, config=CONFIG,imagename=imagename)
-        
-    
+
+
     def on_assert(self, request):
         assert(False);
         pass
-    
+
