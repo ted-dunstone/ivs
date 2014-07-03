@@ -279,17 +279,25 @@ def main(argv):
    os.system(nist_path+"an2k2txt "+in_file+ " "+dir_path+"/"+in_file_name+".fmt")   
    
    
-   records = {} 
+   records = {}
+   header = {}
    NFIQs={}
    minutiae={}
    full_records = [] 
    full_values = [] 
+   fingers={}
    img_x=-1
    img_y=-1
 
    type_14=0;
    finger_index=-1
    compression_algorithm=0
+
+   finger_dpi="" #"4.005":"IMAGE SCANNING RESOLUTION",                    "14.012":"BITS PER PIXEL",
+   finger_source_agency="" #      "14.004":"SOURCE AGENCY/ORI",
+   finger_capture_date="" #        "14.005":"TENPRINT CAPTURE DATE",
+   finger_comment=""      #           "14.020":"COMMENT",
+
 
    #Open txt field file and parse fields/records
    with open(dir_path+"/"+in_file_name+".fmt", 'rw') as fmt_file:
@@ -301,6 +309,9 @@ def main(argv):
             field_val=(splitLine[1])[:len(splitLine[1])-2]           
             new_val=(splitLine[1])
             print("Field number is "+field_num +" Record number is "+rec_num +" field value is "+field_val)
+            
+            if(field_num in record_type_1_to_map):
+               header[record_type_1_to_map[field_num]]=field_val 
 
             if(field_num in x_dim_fields):
                img_x=int(field_val)
@@ -312,8 +323,20 @@ def main(argv):
                print("Found Y-coordinate")
             print(splitLine[1:][0])
             new_val=splitLine[1:][0]
+
+
+            if(field_num in ("4.005","14.012")):
+               finger_dpi=field_val
+               
+            if(field_num in ("14.004")):
+               finger_source_agency=field_val
+            if(field_num in ("14.005")):
+               finger_capture_date=field_val
+            if(field_num in ("14.020")):
+               finger_comment=field_val
+
             
-            if field_num=="14.002" and type_14==1 or field_num=="4.002" and type_14==0:
+            if (field_num=="14.013" and type_14==1 or field_num=="4.004" and type_14==0) and field_val!="255":
                finger_index=int(field_val  )
                print("Finger INDEX is "+str(finger_index))
 
@@ -354,7 +377,18 @@ def main(argv):
                      print("NFIQ is "+nfiq)
                      print("Finger index is "+str(finger_index))
                      NFIQs[finger_index]=int(nfiq[0:len(nfiq)-1])
-                      
+
+                  fingers[finger_index]={"finger":finger_position_codes[str(finger_index)], "x":img_x, 
+                                         "y":img_y, "compressed":compression_algorithm, 
+                                         "source agency":finger_source_agency, "capture date":finger_capture_date,
+                                         "comment":finger_comment, "dpi":finger_dpi, "minutiae":getMinutiae("", field_val[0:len(field_val)-4])}     
+                                         
+                  print fingers[finger_index]
+                                         
+                  finger_dpi="" #"4.005":"IMAGE SCANNING RESOLUTION",                    "14.012":"BITS PER PIXEL",
+                  finger_source_agency="" #      "14.004":"SOURCE AGENCY/ORI",
+                  finger_capture_date="" #        "14.005":"TENPRINT CAPTURE DATE",
+                  finger_comment=""     
                   
                   img_x=-1
                   img_y=-1
@@ -386,6 +420,7 @@ def main(argv):
 #             print(key+"="+value)         
          for i in range(0,len(full_records)):
             fmt_out_file.write(full_records[i]+"="+full_values[i])
+
 
    
    if out_file !='':         
@@ -421,9 +456,11 @@ def main(argv):
    else:
       print("TEST PASSED")
    print NFIQs
-   json_dict={"NFIQ":NFIQs, "Records": records, "Minutiae": minutiae, "Type 1 Def":record_type_1_to_map, 
-              "Type 2 Def":record_type_1_to_map, "Type 14 Def":record_type_1_to_map,
-              "Type 14 Def":record_type_1_to_map}
+   
+#   json_dict={"Header":header, "NFIQ":NFIQs, "Records": records, "Minutiae": minutiae, "Type 1 Def":record_type_1_to_map, 
+#              "Type 2 Def":record_type_1_to_map, "Type 14 Def":record_type_1_to_map,
+#              "Type 14 Def":record_type_1_to_map}
+   json_dict={"Header":header, "Finger Data":fingers}
 
    with open(dir_path + '/'+'json.txt', 'w') as outfile:
         json.dump(json_dict, outfile)
