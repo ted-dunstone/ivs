@@ -25,6 +25,8 @@ static/data/
 .installed.cfg
 *.egg
 
+transformation/fingerprint/TestFiles/Test*
+
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
