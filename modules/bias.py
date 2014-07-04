@@ -501,6 +501,7 @@ class Verify(object):
     def on_verify(self, request):
         import base64,re
         import random
+
         print str(request.form.to_dict())
         file = request.files.get('image')
         imgdata = 'None'
@@ -523,6 +524,8 @@ class Verify(object):
         results =  send_request(self.hub,"bias",verifySubjectRequest)
 
 
+        if 'error' in results:
+            return self.service.render_template('error.html', error=str(results), config=CONFIG,imagename=imagename)
 
         return self.service.render_template('results.html', results=results, config=CONFIG,imagename=imagename)
 
