@@ -5,7 +5,7 @@ echo "BEGINNING TESTS....."
 
 echo "TEST 1"
 
-python convert_NIST_finger.py -i Test1.eft  -f bmp -o Test1_new.eft
+python convert_NIST_finger.py -i TestFiles/Test1.eft  -f bmp -o Test1_new.eft
 
 echo "TEST 2"
 
