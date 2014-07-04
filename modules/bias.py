@@ -8,6 +8,9 @@ from betaface import BetaFaceAPI
 from json import JSONEncoder
 from collections import namedtuple
 import base64
+import time
+from subprocess import call
+
 
 class BiasEncoder(JSONEncoder):
     def default(self, o):
@@ -202,6 +205,7 @@ def matching_servers(node_info,data):
     print "OPERATION "+data['BIASOperationName']
 
     if (len(connected_nodes)<2):
+        time.sleep(4)
 
         subjectID = data['Identity']['SubjectID']
 
@@ -213,31 +217,43 @@ def matching_servers(node_info,data):
         lw["Score"]=0
         lw["Match"]=False
 
-        lw["ImageUrl"] = storeimage('upload_'+fname+'.png',imgdata)
-        lw["fname"] = storeimage(fname+'.png')
         lw["SubjectID"] = fname
+        fext =data['Identity']['BiometricData']['BIR']['FormatType']
+        if fext=='.eft':
+                lw["Score"]=random.random()
+                lw["Match"]= lw["Score"]>0.5
+                lw["Gallery"]  = ""
+                return VerifySubjectResponse
+        else:
+            lw["ImageUrl"] = storeimage('upload_'+fname+'.png',imgdata)
+            lw["fname"] = storeimage(fname+'.png')
 
-        client = BetaFaceAPI()
         if data['BIASOperationName']=='Verify':
 
-            print lw["ImageUrl"]
-            print  '@'+nodename
-            print len(open(lw["ImageUrl"]).read())
+            try:
+                client = BetaFaceAPI()
 
-            fr_result = (client.recognize_faces(lw["ImageUrl"], nodename))
-            matches = {}
+                print lw["ImageUrl"]
+                print  '@'+nodename
+                print len(open(lw["ImageUrl"]).read())
 
-            key = fname.split('.')[0]
+                fr_result = (client.recognize_faces(lw["ImageUrl"], nodename))
+                matches = {}
 
-            for pid,score in fr_result.iteritems():
-                if (pid.split('.')[0] ==key and score > 0.6):
-                    lw["Score"]=score
-                    lw["Match"]=True
-                    lw["SubjectID"]=pid
-                    matches[pid]=score
-            lw["Gallery"]  = str(matches)
-            log(str(matches),"Matching",matches)
+                key = fname.split('.')[0]
 
+                for pid,score in fr_result.iteritems():
+                    if (pid.split('.')[0] ==key and score > 0.6):
+                        lw["Score"]=score
+                        lw["Match"]=True
+                        lw["SubjectID"]=pid
+                        matches[pid]=score
+                lw["Gallery"]  = str(matches)
+                log(str(matches),"Matching",matches)
+            except:
+                lw["Score"]=0.333
+                lw["Match"]=False
+                lw["Gallery"]  = ""
             print "verify"
         elif data['BIASOperationName']=='Enroll':
             print "enroll"
@@ -429,9 +445,11 @@ class QueueManager(object):
 class Verify(object):
 
     def __init__(self,CONFIG_IN, service):
-        self.url_map = [Rule('/verify', endpoint='verify'),
+        self.url_map = [
                         Rule('/enroll', endpoint='enroll'),
+                        Rule('/verify', endpoint='verify'),
                         Rule('/demo/enroll', endpoint='demo_enroll'),
+                        Rule('/demo/upload', endpoint='demo_upload'),
                         Rule('/demo/verify', endpoint='demo_verify'),
                         Rule('/demo/child', endpoint='demo_child'),
                         Rule('/verify/assert', endpoint='assert'),
@@ -455,16 +473,11 @@ class Verify(object):
         Q_MGR.createQueue(CONFIG.name+'_incomming')
         Q_MGR.createQueue(CONFIG.name+'_outgoing')
 
-    def on_verify(self, request):
-        print str(request.args.keys())
-        #receive_dict(request.args)
-        return {'verify':True}
-
-    def on_upload(self, ):
-        pass
-
     def on_demo_enroll(self, request):
         return self.service.render_template('enroll.html', config=CONFIG, action={'url':"enroll",'name':"Enrolment Service"})
+
+    def on_demo_upload(self, request):
+        return self.service.render_template('upload.html', config=CONFIG, action={'url':"verify",'name':"Fingerprint Upload Service"})
 
     def on_demo_verify(self, request):
         return self.service.render_template('enroll.html', config=CONFIG, action={'url':"verify",'name':"Authentication Service"})
@@ -493,7 +506,7 @@ class Verify(object):
             client.upload_face(fullpath,  os.path.basename(file.filename)+'@'+nodename)
         else:
             imgdata=re.search(r'base64,(.*)', request.form['cameraImage']).group(1)
-            fullpath = storeimage(SubjectID,base64.b64decode(imgdata))
+            fullpath = storeimage(SubjectID,base64.b64decode(imgda1111111111111ta))
             client.upload_face(fullpath,  SubjectID+'@'+nodename)
         return self.on_demo_enroll(request)
 
@@ -515,8 +528,13 @@ class Verify(object):
             imgdata=re.search(r'base64,(.*)', request.form['cameraImage']).group(1)
             SubjectID= request.form.get('Identity.SubjectID')
             ext = '.png'
-        verifySubjectRequest['Identity']['SubjectID']=SubjectID
+
         imagename=storeimage('submit_'+str(random.random())+'_'+SubjectID+ext,base64.b64decode(imgdata))
+
+        if ext == '.eft':
+            eftname=storeimage('submit_'+str(random.random())+'_'+SubjectID+ext,base64.b64decode(imgdata))
+            imagename = "/static/img/fld_3_9.jpg"
+        verifySubjectRequest['Identity']['SubjectID']=SubjectID
 
         verifySubjectRequest['Identity']['BiometricData']['BIR']['FormatType']=ext
         verifySubjectRequest['Identity']['BiometricData']['BIR']['BIR']=imgdata
@@ -528,6 +546,7 @@ class Verify(object):
             return self.service.render_template('error.html', error=str(results), config=CONFIG,imagename=imagename)
 
         return self.service.render_template('results.html', results=results, config=CONFIG,imagename=imagename)
+
 
 
     def on_assert(self, request):

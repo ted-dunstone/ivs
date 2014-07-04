@@ -32,8 +32,12 @@
 </head>
 <body style="background-color:#{{config.bgcolor}}">
 	<br />
-
 <div class="container">
+	<div class="row">
+        <div class="col-sm-3">
+<a class="btn btn-primary" onClick="window.history.back();"> < Back </a><br /><br />
+</div>
+</div>
 	<div class="row">
         {% for key in results.keys() recursive%}
 
@@ -55,6 +59,7 @@
                             <label class="text-muted">Score: {{results[key]['VerifySubjectResponsePackage']['Score']}}</label>
                     {%else%}
                      <var>No Match</var>
+                            <label class="text-muted">Score: {{results[key]['VerifySubjectResponsePackage']['Score']}}</label>
                     {%endif%}
                     <!--
                     {% for key2 in results[key]['VerifySubjectResponsePackage'].keys() recursive%}
