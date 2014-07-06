@@ -9,11 +9,11 @@ python convert_NIST_finger.py -i TestFiles/Test1.eft  -f bmp -o Test1_new.eft
 
 echo "TEST 2"
 
-python convert_NIST_finger.py -i TestFiles/Test2.eft  -f bmp -o Test2_new.eft 2>&1 | grep TEST
+python convert_NIST_finger.py -i TestFiles/Test2.eft  -f wsq -o Test2_new.eft 2>&1 | grep TEST
 
 echo "TEST 3"
 
-python convert_NIST_finger.py -i TestFiles/Test3.eft  -f bmp -o Test3_new.eft 2>&1 | grep TEST
+python convert_NIST_finger.py -i TestFiles/Test3.eft  -f tiff -o Test3_new.eft 2>&1 | grep TEST
 
 echo "TEST 4"
 

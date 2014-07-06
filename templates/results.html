@@ -1,29 +1,46 @@
 <!doctype html>
 
-  
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8">
     <title>{{config.name}}</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<!-- Included Bootstrap CSS File -->
+	<link rel="stylesheet" href="/static/js/css/bootstrap.min.css" />
+
+	<!-- Included Bootstrap Extension CSS File to modify some behaviours -->
+	<link rel="stylesheet" 	ef="/static/css/bootstrap-extensions.css" />
+	
+	<!-- Includes FontAwesome -->
+	<link rel="stylesheet" href="/static/css/font-awesome/css/font-awesome.min.css" />
     <style type="text/css">
     .hero-widget { text-align: center; padding-top: 20px; padding-bottom: 20px;min-height:300px }
 .hero-widget .icon { display: block; font-size: 96px; line-height: 96px; margin-bottom: 10px; text-align: center; }
 .hero-widget var { display: block; height: 64px; font-size: 40px; line-height: 64px; font-style: normal; }
 .hero-widget label { font-size: 17px; }
 .hero-widget .options { margin-top: 10px; }    </style>
-    <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
+<!-- jQuery include (http://jquery.com/) -->
+	<script src="/static/js/jquery-1.10.2.min.js"></script>
+	<!-- Include all compiled Bootstrap plugins (http://getbootstrap.com/) -->
+	<script src="/static/js/bootstrap/js/bootstrap.min.js"></script>
+	<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+	<script src="/static/js/respond.min.js"></script>
+	<!-- Holder renders image placeholders entirely on the client side (http://imsky.github.io/holder/) -->
+	<script src="/static/js/holder.js"></script>
 </head>
 <body style="background-color:#{{config.bgcolor}}">
 	<br />
-
 <div class="container">
 	<div class="row">
+        <div class="col-sm-3">
+<a class="btn btn-primary" onClick="window.history.back();"> < Back </a><br /><br />
+</div>
+</div>
+	<div class="row">
         {% for key in results.keys() recursive%}
-    	    
+
         <div class="col-sm-3">
             <div class="hero-widget well well-sm">
                 <div class="text">
@@ -42,6 +59,7 @@
                             <label class="text-muted">Score: {{results[key]['VerifySubjectResponsePackage']['Score']}}</label>
                     {%else%}
                      <var>No Match</var>
+                            <label class="text-muted">Score: {{results[key]['VerifySubjectResponsePackage']['Score']}}</label>
                     {%endif%}
                     <!--
                     {% for key2 in results[key]['VerifySubjectResponsePackage'].keys() recursive%}
@@ -57,7 +75,7 @@
                     <a href="javascript:;" class="btn btn-primary btn-lg"><i class="glyphicon glyphicon-plus"></i> Request Info</a>
                 </div>
             </div>
-             
+
 		</div>
         {% endfor %}
 	</div>

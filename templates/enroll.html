@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <title>{{config.name}} - {{action.name}} </title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
     <style type="text/css">
 canvas {
     display: none;
@@ -27,15 +27,21 @@ video, img, #startbutton {
     font-size: 20px;
 }
         </style>
-    <script src="//code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
-	
-	<link rel="stylesheet" href="//cdn.jsdelivr.net/ladda.bootstrap/0.1/ladda-themeless.min.css">
-	<script src="//cdn.jsdelivr.net/ladda.bootstrap/0.1/spin.min.js"></script>
-	<script src="//cdn.jsdelivr.net/ladda.bootstrap/0.1/ladda.min.js"></script>
+    <!-- jQuery include (http://jquery.com/) -->
+	<script src="/static/js/jquery-1.10.2.min.js"></script>
+	<!-- Include all compiled Bootstrap plugins (http://getbootstrap.com/) -->
+	<script src="/static/js/bootstrap/js/bootstrap.min.js"></script>
+	<!-- Enable responsive features in IE8 with Respond.js (https://github.com/scottjehl/Respond) -->
+	<script src="/static/js/respond.min.js"></script>
+	<!-- Holder renders image placeholders entirely on the client side (http://imsky.github.io/holder/) -->
+	<script src="/static/js/holder.js"></script>
+
+	<link rel="stylesheet" href="/static/css/ladda-themeless.min.css">
+	<script src="/static/js/spin.min.js"></script>
+	<script src="/static/js/ladda.min.js"></script>
 </head>
 <body style="background-color:#{{config.bgcolor}}">
-  
+
 	  <div class="row">
     <div class="col-md-4 col-md-offset-2">
 		<img align="right" src="{{config.logo}}"></img>
@@ -58,7 +64,7 @@ video, img, #startbutton {
               <input type="text" placeholder="Identifier" name="Identity.SubjectID" class="form-control" value="I1">
             </div>
           </div>
-		  
+
 		  {%if action.name=='Authentication Service'%}
 		  <div class="form-group">
             <label class="col-sm-2 control-label" for="textinput">Request Organisations</label>
@@ -71,7 +77,7 @@ video, img, #startbutton {
 			<option value="Immigration">- Police</option>
 		</select>
 			</div>
-		  
+
             <label class="col-sm-2 control-label" for="textinput">Request Locations</label>
             <div class="col-sm-4">
           <select>
@@ -94,7 +100,7 @@ video, img, #startbutton {
 			</div>
 		  </div>
 		  {%endif%}
-		  
+
           <!-- Text input-->
           <div class="form-group">
             <label class="col-sm-2 control-label" for="textinput">First Name</label>
@@ -111,8 +117,8 @@ video, img, #startbutton {
             </div>
           </div>
 
-          
-          
+
+
           <div class="form-group">
            <label class="col-sm-2 control-label" for="textinput">Upload image</label>
            <div class="col-sm-10"><input type="file" accept="image/*" capture="camera" name="image"></div>
@@ -130,11 +136,11 @@ video, img, #startbutton {
             <div class="col-sm-4">
               <input type="text" placeholder="Post Code" class="form-control">
             </div>
-            
-            
+
+
           </div>
-		  
-		  
+
+
           <div class="form-group">
             <div class="col-sm-offset-2 col-sm-10">
               <div class="pull-right">
@@ -146,7 +152,7 @@ video, img, #startbutton {
 		<input type="hidden"  name="cameraImage" id="cameraImage">
         <input type="hidden" name="cameraImage2" id="cameraImage2" value="blah">
         </fieldset>
-        
+
       </form>
     </div><!-- /.col-lg-12 -->
 	<div class="col-md-2" id="camera">
@@ -184,18 +190,18 @@ if (isiPhone()) document.getElementById("camera").style.display = 'none';
       width = 200,
       height = 0;
 
-  navigator.getMedia = ( navigator.getUserMedia || 
+  navigator.getMedia = ( navigator.getUserMedia ||
                          navigator.webkitGetUserMedia ||
                          navigator.mozGetUserMedia ||
                          navigator.msGetUserMedia);
 
   navigator.getMedia(
-    { 
-      video: true, 
-      audio: false 
+    {
+      video: true,
+      audio: false
     },
     function(stream) {
-      if (navigator.mozGetUserMedia) { 
+      if (navigator.mozGetUserMedia) {
         video.mozSrcObject = stream;
       } else {
         var vendorURL = window.URL || window.webkitURL;
@@ -228,12 +234,12 @@ if (isiPhone()) document.getElementById("camera").style.display = 'none';
 	document.getElementById("cameraImage").value = data
 
   }
-  
+
   startbutton.addEventListener('click', function(ev){
       takepicture();
     ev.preventDefault();
   }, false);
-  
+
 })();
 	
 Ladda.bind( 'button[type=submit]' );

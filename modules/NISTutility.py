@@ -22,7 +22,7 @@ import numpy as np
 
 
 #NIST binary path
-nist_path="NIST_linux_x86_64_binary/"
+nist_path="~/work/DIAC/FingerprintStuff/NIST_linux_x86_64_binary/"
 
 record_type_1_to_map={
                     "1.001":"LOGICAL RECORD LENGTH", 
@@ -110,8 +110,6 @@ x_dim_fields=["4.006", "14.006",]
                  
 y_dim_fields=["4.007", "14.007",]
 
-#valid image formats for transformation
-valid_image_formats=["jpg", "jpeg", "bmp", "png", "wsq", "tiff"]
 
 
 
@@ -127,7 +125,6 @@ def getMinutiae(path, finger_name):
                 fields = line.split(' ')
                 X=float(fields[2])#/scale
                 Y=float(fields[3])#/scale
-
                 
                 for i in range(3):
                         fh.readline()
@@ -215,46 +212,11 @@ def getMinutiae(path, finger_name):
 
 
 
-def main(argv):
-   in_file = ''
-   out_format = ''
-   out_file=''
-   
-   try:
-      opts, args = getopt.getopt(argv,"hi:f:o:",["ifile=","ofile=","format="])
-   except getopt.GetoptError:
-      print 'convert_NIST_finger.py -i <inputfile> -f <format> [-o <outputfile>]'
-      sys.exit(2)
-   for opt, arg in opts:
-      if opt == '-h':
-         print 'convert_NIST_finger.py -i <inputfile> -f <format> [-o <outputfile>]'
-         sys.exit(1)
-      elif opt in ("-i", "--ifile"):
-         in_file = arg
-      elif opt in ("-f", "--format"):
-         out_format = arg
-      elif opt in ("-o", "--ofile"):
-         out_file = arg
-         
-   if(not out_format in valid_image_formats):
-      print("Invalid image format "+ out_format)
-      sys.exit(1);
-   
-   
-   if(len(in_file)<4 or in_file[len(in_file)-4:]!=".eft"):
-      print("Incorrect file format: " + in_file[len(in_file)-4:])
-      sys.exit(1)
-   dir_path=in_file[0:len(in_file)-4]
-   
-   if not os.path.isfile(in_file):
-      print("file '"+in_file+ "' does not exist!")
-      sys.exit(1)
 
-   print("Input file is "+ in_file)
-   print("Output format is "+ out_format)
-   print("Output file is "+ out_file)
-
+def convertNIST(in_file, image_format, out_file):
+   print("Input file is "+ in_file+" Image format is "+ image_format +" Output file is "+ out_file)
    in_file_name=in_file[max(0, in_file.rfind('/')+1):len(in_file)-4]
+   dir_path=in_file[0:len(in_file)-4]
 
    if os.path.exists(dir_path):
       print("Attempting to clean/remove directory "+dir_path)
@@ -265,14 +227,15 @@ def main(argv):
       except:
           pass
       
-   #Create output directory if does not exist 
-   #(directory removal just attempted so should not exist unless permissions issue)
+   #Create output directory if does not exist (directory removal just attempted so should not exist unless permissions issue)
    if not os.path.exists(dir_path):
       print("Creating directory "+dir_path)
       os.makedirs(dir_path)
    else:   
       print("Directory "+dir_path+" already exists and cannot be removed")
       sys.exit(1)
+
+   os.chdir(dir_path) 
       
    #Produce NIST formatted field and raw image output   
    print("Running "+nist_path+"an2k2txt "+in_file+ " "+dir_path+"/"+in_file_name+".fmt")
@@ -298,7 +261,6 @@ def main(argv):
    finger_capture_date="" #        "14.005":"TENPRINT CAPTURE DATE",
    finger_comment=""      #           "14.020":"COMMENT",
    idc=""                # "14.002":"IMAGE DESIGNATION CHARACTER",
-   image_name=""
 
 
    #Open txt field file and parse fields/records
@@ -351,8 +313,8 @@ def main(argv):
             
             if(".tmp" in splitLine[1:][0]):
                print("Found image file "+splitLine[1:][0])
-               splitLine[1:][0]=(splitLine[1:][0]).replace(".tmp", "."+out_format)
-               new_val=(splitLine[1:][0]).replace(".tmp", "."+out_format)
+               splitLine[1:][0]=(splitLine[1:][0]).replace(".tmp", "."+image_format)
+               new_val=(splitLine[1:][0]).replace(".tmp", "."+image_format)
                if(img_x!=-1 and img_y!=-1):
                   if compression_algorithm==0: 
                      pass 
@@ -365,7 +327,7 @@ def main(argv):
                   os.system("rawtopgm "+str(img_x)+ " "+str(img_y) +" "+ field_val + " > " + field_val[0:len(field_val)-3]+"pgm")   
                   print("convert -quality 100 "+field_val[0:len(field_val)-3]+"pgm"+ " " + field_val[0:len(field_val)-3]+"jpg")
                   os.system("convert -quality 100 "+field_val[0:len(field_val)-3]+"pgm"+ " " + field_val[0:len(field_val)-3]+"jpg")
-                  os.system("convert -quality 100 "+field_val[0:len(field_val)-3]+"pgm"+ " " + field_val[0:len(field_val)-3]+out_format)
+                  os.system("convert -quality 100 "+field_val[0:len(field_val)-3]+"pgm"+ " " + field_val[0:len(field_val)-3]+image_format)
                                  
                   #Extract minutiae and orientation flow information
                   os.system(nist_path+"mindtct  -b  -m1 "+field_val[0:len(field_val)-3]+"jpg" +" "+field_val[0:len(field_val)-4]) 
@@ -402,13 +364,9 @@ def main(argv):
                   idc=""            #     "14.002":"IMAGE DESIGNATION CHARACTER",
                   img_x=-1
                   img_y=-1
-#                  os.system("mv "+ field_val[0:len(field_val)-3]+out_format+ " "+dir_path+"/" )   
                
             records[rec_num] = {"field":field_num, "value":new_val[:len(new_val)-2]}
-#            full_records[splitLine[0]] = ",".join(splitLine[1:])
-#            full_records[splitLine[0]] = ",".join([new_val])
             full_records.append(splitLine[0])
-
             
             #Test to see if Type 4 or 14 record
             if field_num=="1.003":
@@ -425,13 +383,8 @@ def main(argv):
         fmt_file.close()
         
    with open(dir_path+"/"+in_file_name+".new.fmt", 'w') as fmt_out_file:
-  #      for key, value in full_records.iteritems():
-#        for key in sorted(full_records):
-#             print(key+"="+value)         
          for i in range(0,len(full_records)):
             fmt_out_file.write(full_records[i]+"="+full_values[i])
-
-
    
    if out_file !='':         
       os.system(nist_path+"txt2an2k "+dir_path+"/"+in_file_name+".new.fmt" +" "+out_file) 
@@ -439,24 +392,21 @@ def main(argv):
    else:         
       os.system(nist_path+"txt2an2k "+dir_path+"/"+in_file_name+".new.fmt" +" "+"new.eft") 
       print(nist_path+"txt2an2k "+dir_path+"/"+in_file_name+".new.fmt" +" "+"new.eft")
-   
 
    #Cleanup images      
-   os.system("rm *.tmp")
-   os.system("rm *.pgm")
-   os.system("rm *.ncm")
 #   os.system("rm *.tmp")
-   os.system("mv *.jpg" +" "+dir_path+"/" )
-   os.system("mv *.brw" +" "+dir_path+"/" )
-   os.system("mv *.hcm" +" "+dir_path+"/" )
-   os.system("mv *.lcm" +" "+dir_path+"/" )
-   os.system("mv *.xyt" +" "+dir_path+"/" )
-   os.system("mv *.min" +" "+dir_path+"/" )
-   os.system("mv *.dm" +" "+dir_path+"/" )
-   os.system("mv *.qm" +" "+dir_path+"/" )
-   os.system("mv *.lfm" +" "+dir_path+"/" )
-#   os.system("mv *.nfiq" +" "+dir_path+"/" )
-   os.system("mv *."+out_format +" "+dir_path+"/" )
+#   os.system("rm *.pgm")
+#   os.system("rm *.ncm")
+#   os.system("mv *.jpg" +" "+dir_path+"/" )
+#   os.system("mv *.brw" +" "+dir_path+"/" )
+#   os.system("mv *.hcm" +" "+dir_path+"/" )
+#   os.system("mv *.lcm" +" "+dir_path+"/" )
+#   os.system("mv *.xyt" +" "+dir_path+"/" )
+#   os.system("mv *.min" +" "+dir_path+"/" )
+#   os.system("mv *.dm" +" "+dir_path+"/" )
+#   os.system("mv *.qm" +" "+dir_path+"/" )
+#   os.system("mv *.lfm" +" "+dir_path+"/" )
+#   os.system("mv *."+image_format +" "+dir_path+"/" )
 
    if (not '1.5.1.1 [1.005]' in full_records) and type_14==0:
       print("TEST FAILED. Missing date field 1.005")      
@@ -466,7 +416,7 @@ def main(argv):
    else:
       print("TEST PASSED")
    print NFIQs
-   
+ 
 #   json_dict={"Header":header, "NFIQ":NFIQs, "Records": records, "Minutiae": minutiae, "Type 1 Def":record_type_1_to_map, 
 #              "Type 2 Def":record_type_1_to_map, "Type 14 Def":record_type_1_to_map,
 #              "Type 14 Def":record_type_1_to_map}
@@ -476,8 +426,56 @@ def main(argv):
         json.dump(json_dict, outfile)
    
 
+
+#valid image formats for transformation
+valid_image_formats=["jpg", "jpeg", "bmp", "png", "wsq", "tiff"]
+
+    
+def main(argv):
+   in_file = ''
+   out_format = ''
+   out_file=''
+   opts=[]   
+   try:
+      opts, args = getopt.getopt(argv,"hi:f:o:",["ifile=","ofile=","format="])
+   except getopt.GetoptError:
+      print 'convert_NIST_finger.py -i <inputfile> -f <format> [-o <outputfile>]'
+      sys.exit(2)
+   print opts   
+   print " RRRRRRRRRRRRR"
+   for opt, arg in opts:
+      print arg 
+      if opt == '-h':
+         print 'convert_NIST_finger.py -i <inputfile> -f <format> [-o <outputfile>]'
+         sys.exit(1)
+      elif opt in ("-i", "--ifile"):
+         in_file = arg
+      elif opt in ("-f", "--format"):
+         out_format = arg
+      elif opt in ("-o", "--ofile"):
+         out_file = arg
+   print argv            
+   if(not out_format in valid_image_formats):
+      print("Invalid image format "+ out_format)
+      sys.exit(1);
+       
+       
+   if(len(in_file)<4 or in_file[len(in_file)-4:]!=".eft"):
+      print("Incorrect file format: " + in_file[len(in_file)-4:])
+      sys.exit(1)
       
-#print sys.argv[1:]   
-main(sys.argv[1:])   
+   if not os.path.isfile(in_file):
+      print("file '"+in_file+ "' does not exist!")
+      sys.exit(1)
+   convertNIST(in_file, out_format, out_file)
+
+
+if __name__ == "__main__":
+   try:
+      opts, args = getopt.getopt(sys.argv,"hi:f:o:",["ifile=","ofile=","format="])
+      print args
+   except getopt.GetoptError: 
+      pass    
+   main(sys.argv[1:])
 
 
