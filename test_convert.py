@@ -16,10 +16,10 @@ import os
 import sys
 import getopt
 import shutil
-import NISTutility as nu
+import modules.NISTutility as nu
 
 #NIST binary path
-nist_path="~/work/DIAC/FingerprintStuff/NIST_linux_x86_64_binary/"
+nist_path="bin/"
 
 
 #valid image formats for transformation

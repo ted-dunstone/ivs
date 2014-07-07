@@ -506,7 +506,7 @@ class Verify(object):
             client.upload_face(fullpath,  os.path.basename(file.filename)+'@'+nodename)
         else:
             imgdata=re.search(r'base64,(.*)', request.form['cameraImage']).group(1)
-            fullpath = storeimage(SubjectID,base64.b64decode(imgda1111111111111ta))
+            fullpath = storeimage(SubjectID,base64.b64decode(imgdata))
             client.upload_face(fullpath,  SubjectID+'@'+nodename)
         return self.on_demo_enroll(request)
 
@@ -532,8 +532,11 @@ class Verify(object):
 
         imagename=storeimage('submit_'+str(random.random())+'_'+SubjectID+ext,base64.b64decode(imgdata))
 
-        if ext == '.eft':
+        NISTResult={}
+	if ext == '.eft':
             eftname=storeimage('submit_'+str(random.random())+'_'+SubjectID+ext,base64.b64decode(imgdata))
+	    import modules.NISTutility as nu
+            NISTResult=nu.convertNIST(eftname,'jpg','new_i'+eftname)
             imagename = "/static/img/fld_3_9.jpg"
         verifySubjectRequest['Identity']['SubjectID']=SubjectID
 
@@ -542,11 +545,10 @@ class Verify(object):
 
         results =  send_request(self.hub,"bias",verifySubjectRequest)
 
-
         if 'error' in results:
-            return self.service.render_template('error.html', error=str(results), config=CONFIG,imagename=imagename)
+            return self.service.render_template('error.html', error=str(results), config=CONFIG,imagename=imagename,NISTResult=NISTResult)
 
-        return self.service.render_template('results.html', results=results, config=CONFIG,imagename=imagename)
+        return self.service.render_template('results.html', results=results, config=CONFIG,imagename=imagename ,NISTResult=NISTResult)
 
 
 

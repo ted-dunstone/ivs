@@ -22,7 +22,8 @@ import numpy as np
 
 
 #NIST binary path
-nist_path="~/work/DIAC/FingerprintStuff/NIST_linux_x86_64_binary/"
+root_path=os.path.dirname(os.path.dirname(os.path.realpath(__file__)))+'/'
+nist_path=root_path+"modules/bin/"
 
 record_type_1_to_map={
                     "1.001":"LOGICAL RECORD LENGTH", 
@@ -216,8 +217,11 @@ def getMinutiae(path, finger_name):
 def convertNIST(in_file, image_format, out_file):
    print("Input file is "+ in_file+" Image format is "+ image_format +" Output file is "+ out_file)
    in_file_name=in_file[max(0, in_file.rfind('/')+1):len(in_file)-4]
-   dir_path=in_file[0:len(in_file)-4]
 
+   in_file  = root_path+in_file
+   out_file = root_path+out_file
+   
+   dir_path=in_file[0:len(in_file)-4]
    if os.path.exists(dir_path):
       print("Attempting to clean/remove directory "+dir_path)
       shutil.rmtree(dir_path)   
@@ -239,7 +243,8 @@ def convertNIST(in_file, image_format, out_file):
       
    #Produce NIST formatted field and raw image output   
    print("Running "+nist_path+"an2k2txt "+in_file+ " "+dir_path+"/"+in_file_name+".fmt")
-   os.system(nist_path+"an2k2txt "+in_file+ " "+dir_path+"/"+in_file_name+".fmt")   
+   if (os.system(nist_path+"an2k2txt "+in_file+ " "+dir_path+"/"+in_file_name+".fmt")<>0):
+     assert("fail - probably can't find %s"%nist_path+"an2k2txt")   
    
    
    records = {}
@@ -425,6 +430,8 @@ def convertNIST(in_file, image_format, out_file):
    with open(dir_path + '/'+'json.txt', 'w') as outfile:
         json.dump(json_dict, outfile)
    
+   os.chdir(root_path) 
+   return json_dict 
 
 
 #valid image formats for transformation
