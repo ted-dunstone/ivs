@@ -13,8 +13,11 @@ sudo apt-get install redis-server
 sudo apt-get install python-numpy python-scipy
 sudo apt-get install rabbitmq-server
 
+<<<<<<< HEAD
+=======
 sudo apt-get install nginx
 
+>>>>>>> 8241059c9b8f4220ca1869df2d75e6bb8dd9b93a
 sudo apt-get install netpbm
 sudo apt-get install imagemagick
 

@@ -38,7 +38,14 @@
 <a class="btn btn-primary" onClick="window.history.back();"> < Back </a><br /><br />
 </div>
 </div>
+{% if 'Header' in NISTResult %}
+
+        {% for key in NISTResult['Header'].keys() %}
+{{key}} : {{NISTResult['Header'][key]}} <BR>
+        {% endfor %}
+{% endif %}
 	<div class="row">
+
         {% for key in results.keys() recursive%}
 
         <div class="col-sm-3">
