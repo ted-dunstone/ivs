@@ -198,6 +198,7 @@ def storeimage(fname,imgdata=None):
     return fullpath
 
 
+# Hub distribution code 
 
 def matching_servers(node_info,data):
     global connected_nodes, CONFIG
