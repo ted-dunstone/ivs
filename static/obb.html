@@ -1,0 +1,960 @@
+
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta charset='utf-8'>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    
+  
+  <link rel="stylesheet" href="libs/bootstrap/css/bootstrap.min.css" type="text/css">
+  <link rel="stylesheet" href="libs/bootstrap/css/bootstrap-theme.min.css" type="text/css">
+  <style>
+    .btn-file {
+    position: relative;
+    overflow: hidden;
+      }
+      .btn-file input[type=file] {
+          position: absolute;
+          top: 0;
+          right: 0;
+          min-width: 100%;
+          min-height: 100%;
+          font-size: 999px;
+          text-align: right;
+          filter: alpha(opacity=0);
+          opacity: 0;
+          background: red;
+          cursor: inherit;
+          display: block;
+      }
+      
+      .search-clear {
+          text-indent: -1000em;
+          width: 16px;
+          height: 16px;
+          display: inline-block;
+          position: relative;
+          left: -22px;
+          top: 3px;
+    }
+    
+  </style>
+  <style>
+    body { 
+        background: url('http://www.bitrebels.com/wp-content/uploads/2013/02/biometric-fingerprint-store-purchases-4.jpg') no-repeat center center fixed; 
+        -webkit-background-size: cover;
+        -moz-background-size: cover;
+        -o-background-size: cover;
+        background-size: cover;
+  }
+  </style>
+  <!--[if lt IE 9]>  
+    <script src="libs/html5shiv.js"></script>
+    <script src="libs/respond.min.js"></script>
+    
+    
+    
+  <![endif]-->
+  <title></title>
+</head>
+
+<body>
+  <!--Add a button for the user to click to initiate auth sequence -->
+ <!--<script type="text/javascript" src="https://www.google.com/jsapi">
+</script>
+-->
+<script type="text/javascript">
+//    google.load("gdata", "2");
+//      //google.load("client", "2");
+//      google.load("search", "1");
+//      google.load('visualization', '1', {packages:['orgchart','GeoChart','AnnotatedTimeLine','ColumnChart','corechart']});
+      
+      //google.load("jquery", "1.5");
+      //google.load("jqueryui", "1.7.2");
+  </script><!-- Latest compiled and minified CSS -->
+  <!-- Optional theme -->
+  <!-- Latest compiled and minified JavaScript -->
+  <script src="libs/jquery/jquery-1.8.3.min.js"></script>
+  <script src="libs/jquery.timeago.js"></script>
+  <script src="libs/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+  <script src="libs/mustache.js"></script>
+
+  <!--script type="text/javascript" src="libs/jqplot/jquery.min.js"></script-->
+    <script type="text/javascript" src="libs/jqplot/jquery.jqplot.min.js"></script>
+    <script type="text/javascript" src="libs/jqplot/plugins/jqplot.meterGaugeRenderer.min.js"></script>
+    <link rel="stylesheet" type="text/css" hrf="libs/jqplot/jquery.jqplot.min.css" />
+
+<script>
+ /// GLOBALS
+ 
+  URL_EVENT_QUEUE_JSON = '/DIAC/static/pendingreports.json'
+  URL_PXREST_SERVER = "http://"+window.location.host+":8081"
+  jQuery.support.cors = true; 
+/*  $.get("/init/autoreports/islogin.json",function(data) {
+      alert(data.is_logged_in)
+  })
+ */
+  function clickfun() {
+        $("#myModal").modal("show");
+        $('#myImg').attr('src',lastimg)
+      }
+      
+  function check_logged_in() {
+    $.get("/init/autoreportUtil/isloggedin.json",function(data) {
+      if (!data.is_logged_in) {
+         window.location = '/'
+      }
+    })
+  }
+      
+  function field_change(event) {
+    var val = $(event).val()
+    if (val.match(/\n/g)) /// if multiline then make sure its a paragraph
+      val = '<P>'+val.replace(/[\n\r]/g,'</P><P>\n')+'</P>'
+    
+    var name = $(event).attr('name')
+    $.get(URL_PXREST_SERVER+"/os/update?filename="+FILENAME+"&"+name+'='+encodeURIComponent(val),function(data) {
+    // encodeURIComponent(.replace('\\','/')
+      //console.log("updated : "+name+","+val, FILENAME)
+      })
+  }
+  
+  function formToDict(inputForm,data,stripHTML) {
+        var viewArr = inputForm.serializeArray()
+            , view = {};
+            
+            
+            for (var i in viewArr) {
+              val = viewArr[i].value;
+              if (data) {
+                 val = Mustache.render("{{=[ ]=}}"+val,data)
+              }
+              val = val.replace(/<.*>/g,"")
+
+              view[viewArr[i].name] = val;
+            }
+        return view
+    }
+    
+  function convertDictForm(title,tmpdict,data) {
+    var outJson = '<h4>'+title+'</h4><form class="form-horizontal" role="form">'
+    
+    var keys = [];
+    
+    for (var x in tmpdict) 
+      if(tmpdict.hasOwnProperty(x)) {
+          if (typeof(tmpdict[x])==typeof({})) {
+            if ("order" in tmpdict[x]) {
+              keys.push(tmpdict[x].order+'~'+x);
+            } else {
+              keys.push('9'+'~'+x);
+            }
+          } else
+            keys.push('0'+'~'+x);
+      }
+      keys.sort()
+      
+      $.each(keys,function(idx,key){
+          keyval = key.split('~')
+          val = tmpdict[keyval[1]]
+          key = keyval[1]
+          if (typeof(val)==typeof("")) {
+            var disabled=''
+            if (val[0]=='[') {
+              disabled=''
+            }
+            if (data) {
+               val = Mustache.render(val,data)
+            }
+            outJson+='<div class="form-group"><label class="col-sm-2 control-label">'+key.replace(/_/g,' ')+'</label> <div class="col-sm-10"><input name="'+key+'"class="form-control" value="'+val+'" onchange="field_change(this);" '+disabled+'/></div></div>'
+            //code
+          } else if (typeof(val)==typeof({})) {
+            var style = ''
+            if (val.display=="false") {
+              style='display:none;';
+            }
+            if (val.type=='text') {
+              value = ''
+              if (val.val) {
+                value = Mustache.render(val.val,data) 
+              } else if (key in data) {
+                value = data[key]
+              }
+              outJson+='<div class="form-group" style="'+style+'"><label class="col-sm-2 control-label">'+key.replace(/_/g,' ')+'</label> <div class="col-sm-10"><input name="'+key+'"class="form-control" value="'+value+'" onchange="field_change(this);" '+disabled+'/></div></div>'
+            } else if (val.type=='textarea') {
+              value = ''
+              if (val.val) {
+                value = Mustache.render(val.val,data) 
+              } else if (key in data) {
+                value = data[key]
+              }
+              value = value.replace(/<.*>/g,"") // remove if paras
+              outJson+='<div class="form-group" style="'+style+'"><label class="col-sm-2 control-label">'+key.replace(/_/g,' ')+'</label> <div class="col-sm-10"><textarea name="'+key+'" class="form-control" onchange="field_change(this);">'+value+'</textarea></div></div>'
+            } else if (val.type=='select') {
+              var optstr=""
+              value=""
+              if (key in data) {
+                value = data[key]
+              }
+              $.each(val.options,function(idx,opt) {
+                  var selected = ""
+                  if (opt == value) selected="selected"
+                 optstr+='<option '+selected+'>'+opt+'</option>'
+              })
+              outJson+='<div class="form-group" style="'+style+'"><label class="col-sm-2 control-label">'+key.replace(/_/g,' ')+'</label> <div class="col-sm-10"><select name="'+key+'"class="form-control" value="'+value+'" onchange="field_change(this);">'+optstr+'</select></div></div>'
+            }
+          }
+          //<BR>'+key+' = '+JSON.stringify(val)
+        })
+      outJson += '</form>'
+      return outJson
+      
+  }
+  
+  function paramview(url,filename,master_recordid) {
+  // The master recordid is usually the bams ID but may change (iei have FCC country appended)
+  // This record is needed since it is used to exclude records when they have been viewed
+    //console.log("******"+filename)
+     //$.get("http://127.0.0.1:8081/os/read?filename="+encodeURIComponent(filename),function(data) {
+     $.get(url+'?'+Math.random(),function(data) {
+//      console.log("fetched ",data)
+      var tmpdict = {}
+      var title = url
+      if ('_meta' in data) {
+        if ('fields' in data['_meta']) {
+            $.extend(tmpdict,data['_meta']['fields'])
+        } else {
+            $.extend(tmpdict,data)
+            delete tmpdict['_meta']          
+        }
+        if ('title' in data['_meta']) {
+          title = Mustache.render(data['_meta']['title'],data)
+        }
+      }
+
+      fileparts = url.split('/')
+      pdfUrl = url+'.pdf'+'?'+Math.random()
+      BAMSID=data.BAMSID
+      FILENAME=data.filename
+      FILENAME=url
+      outJson = ""
+      outJson += '<a id="pdfFullScreen" target="_pdf" href="'+pdfUrl+'">View Report Pdf</a>'
+      outJson += convertDictForm(title,tmpdict,data)
+      $('#json').html(outJson)
+
+      $('#approveReportButton').unbind('click')
+      $('#approveReportButton').bind('click',function(){
+         
+         $("#myModal").modal("hide");
+         maildict=data['_meta']['mail']
+         $('#approvalForm').html(convertDictForm(title,maildict,data))
+         $("#approvalModal").modal("show");
+         $('#sendMail').unbind('click')
+         $('#sendMail').bind('click',function() {
+          formData = formToDict($('#approvalForm').find("form"))
+          formData['title']=title
+          formData['CLASSIFICATION']='[DLM=SENSITIVE]'
+          if (
+              ("Trim_Number" in formData && formData.Trim_Number.length<4) || (!("Trim_Number" in formData)) || ("Trim_Number" in formData && formData.Trim_Number.substr(0,3) != "ADD" )
+              ) {
+                    alert("Mail requires valid Trim Number starting with ADD")
+                    return false;
+          }
+          if ("To" in formData && (formData.To.length<5 || !(/\S+@\S+/.test(formData.To)))) {
+                    alert("Mail requires a valid email address")
+                    return false;
+          } 
+          
+          console.log(formData)
+          $('#sendMail').button("loading")
+        
+          $.ajax({url:URL_PXREST_SERVER+"/os/mail",
+                 data: formToDict($('#approvalForm').find("form"),formData),
+                 success: function(data) {
+                    if ('status' in data && data['status']=='error') {
+                        $('#sendMail').button("reset")
+                       alert("Mail not sent. Error: "+data['exception'])
+                    }
+                    else {
+                      console.log("mailed")
+                          $.get(URL_PXREST_SERVER+"/os/update?filename=/DIAC/static/excluded.json&"+master_recordid+'='+""+new Date(),function(data) {
+                                $.get(URL_PXREST_SERVER+"/os/refresh?filename=MatchExtract",function(data) {
+                                  window.setTimeout(function () {
+                                      $('#sendMail').button("reset")
+                                      loadEvents()
+                                      $("#approvalModal").modal("hide");
+                                    },3000)
+                                })
+
+                            })
+                  }
+                 },
+                 failed: function() {
+                    $('#sendMail').button("reset")
+                    $('#sendMail').button("reset")
+                    alert("mail not sent")
+                 }
+                 
+          })
+         })
+         
+      })
+      
+      $('#updateReportButton').unbind('click')  
+      $('#updateReportButton').bind('click',function(){
+         $('#updateReportButton').button('loading')
+         $.get(URL_PXREST_SERVER+'/os/topdf/test?filename='+data.filename,function() {
+            $('#updateReportButton').button('reset')
+            var newUrl = pdfUrl+'?'+Math.random()
+            $('#pdfFullScreen').attr('href',newUrl)
+            //$('#pdfpreview').attr('src',newUrl)
+            
+         })
+      })
+       $('#deleteReportButton').unbind('click')
+       $('#deleteReportButton').bind('click',function(){
+         $("#myModal").modal("hide");
+         //$('#deleteModalText').html("Delete filename")
+         $("#deleteModal").modal("show");
+      })
+       $('#doDeleteButton').unbind('click')
+      $('#doDeleteButton').bind('click',function(){
+           $('#doDeleteButton').button('loading')
+         
+           $.get(URL_PXREST_SERVER+"/os/update?filename=/DIAC/static/excluded.json&"+BAMSID+'='+""+new Date(),function(data) {
+                 $.get(URL_PXREST_SERVER+"/os/refresh?filename=MatchExtract",function(data) {
+                      window.setTimeout(function () {
+                      loadEvents()
+                      $("#deleteModal").modal("hide");
+                      $('#doDeleteButton').button('reset')
+                    },3000)
+          })
+            })
+
+          
+      })
+      window.setTimeout(function () {
+    /*    var myPDF = new PDFObject({
+            url: pdfUrl,
+            id:"myPDF",
+            width: "100%",
+            height: "300px"
+        }).embed("pdfpreview")*/
+  //      $('#pdfpreview').html('<object data="'+pdfUrl+'" type="application/pdf" width="100%" height="300px" ><param name="src" value="'+pdfUrl+'"> Click to open PDF </object> ')
+       // $('#pdfpreview').html('<iframe src="'+pdfUrl+'" width="100%" height="300px"></iframe> ')
+      },500)
+
+      })
+     $("#myModal").modal("show");
+  }
+  
+  
+  function add_event(bucket,obj) {
+      /*lastimg = "https://192.168.1.106:8000/welcome/static/images/"+obj['optical_image_filename']
+      img = '<td><img width=30 src="https://192.168.1.106:8000/welcome/static/images/'+obj['optical_image_filename']+'"></td>'
+      user = '<td><span class="glyphicon glyphicon-user" style="color:blue;font-size:20px;"></span></td>'
+      disguise = obj['disguise_detected'] == 'True'
+      if (disguise) {
+          status = '<td><span class="glyphicon glyphicon-remove" style="color:red;font-size:20px;"></span></span></td>'
+          actions = '<a onclick="clickfun()"><td><span class="glyphicon glyphicon-bell"></span></a> <span class="glyphicon glyphicon-camera"></span></td>'
+          style = 'danger'
+      } else {
+        status = '<td><span class="glyphicon glyphicon-ok" style="color:green;font-size:20px;"></span></td>'
+        
+        actions = '<td><a onclick="clickfun()"><span class="glyphicon glyphicon-camera"></span></a></td>'
+          style = ''
+      }
+      time = '<td>'+obj['timestamp']+'</td>'
+      device = '<td>Counter 001</td>'
+      confidence = '<td>'+obj['face_termperature']+'</td>'
+      */
+      
+      id = '<td >'+obj.BAMSID+'</td>'
+      name='<td>'+obj.FAMILY_NAME+'</td>'
+      caseload = '<td >'+obj.CASELOAD+'</td>'
+      specalist = '<td >'+obj.EXPERT+'</td>'
+      loc = '<td >'+obj.ACQUISITION_LOCATION+'</td>'
+      date = "<td width='160px' align='right'><span class='timeago' title='"+obj.ENROLMENT_DATE_UTC+"'>"+obj.ENROLMENT_DATE_UTC+"</span></td>"
+      
+      style = ''+obj.BAMSID+' '+obj.FAMILY_NAME+' '+obj.CASELOAD+' '+obj.EXPERT+' '+obj.ACQUISITION_LOCATION
+      
+      //console.log(bucket)
+//      $.each(obj,function(idx,val) {style+=val.toLowerCase()+' '})
+      if (bucket.length<3) {
+        bucket='incoming'
+      } else bucket=bucket.split('/').pop()
+      //console.log(bucket)
+      //console.log($('#'+bucket+' tbody'))
+      bshow = '<td>'+bucket+'</td>'
+      $('#'+bucket+' tbody').append('<tr onclick="paramview('+"'"+obj.url+"','"+obj.filename+"','"+obj.BAMSID+"')"+'" class="'+style.toLowerCase()+'">'+date+id+name+loc+caseload+specalist+'</tr>');
+    }
+
+function loadEvents() {
+    $(function ()
+{
+        
+        $.ajax(
+        {
+            url: URL_EVENT_QUEUE_JSON+'?'+Math.random(),
+            //http://127.0.0.1:8081/os/list/json?allowed_dirs=pending&allowed_dirs=incoming&allowed_dirs=sending', // JSON_URL is a global variable
+            dataType: 'json',
+
+            success: function (json)
+            {
+                 //console.log(json)
+                 $.each(json,function(bucket,files){
+                  files = files.sort(function(a,b) { 
+                     if (a.ENROLMENT_DATE_UTC < b.ENROLMENT_DATE_UTC) return 1;
+                     if (a.ENROLMENT_DATE_UTC > b.ENROLMENT_DATE_UTC) return -1; 
+                     return 0; 
+                     });
+                  $('#'+bucket+' tbody').empty()
+                  $.each(files,function(idx,obj){
+                   add_event(bucket,obj)
+                  })
+                 })
+                 $("span.timeago").timeago();
+                
+//               if (timestamp != json['timestamp']) {
+//                   add_event(json)
+//                   timestamp = json['timestamp']
+//               }
+            },
+
+            error: function ()
+            {
+                // on error, stop execution
+                //i.clearInterval();
+            }
+        });
+});
+}
+
+
+/*    
+$(function ()
+{
+    // reference cache to speed up the process of querying for the status element
+    timestamp = ''
+    // this function will run each 1000 ms until stopped with clearInterval()
+    var i = setInterval(function ()
+    {
+      
+        $.ajax(
+        {
+            url: 'https://192.168.1.106:8000/welcome/vision', // JSON_URL is a global variable
+            dataType: 'json',
+
+            success: function (json)
+            {
+               if (timestamp != json['timestamp']) {
+                   add_event(json)
+                   timestamp = json['timestamp']
+               }
+            },
+
+            error: function ()
+            {
+                // on error, stop execution
+                //i.clearInterval();
+            }
+        });
+    }, 2000);
+});
+*/
+</script>
+
+
+  <script type="text/javascript">
+    function unique(array,count) {
+    var unique = {};
+      $.each(array, function(a,b){
+          if (!unique[b])
+              unique[b] = 0;
+          unique[b]++;
+      });
+      $.each(unique, function(k,v){
+          if (v<count)
+              delete unique[k];
+      });
+      return unique
+    }
+    
+    check_logged_in()
+    
+     $(document).ready(function(){
+   /* $.ajaxTransport("+*", function( options, originalOptions, jqXHR ) {
+      if(jQuery.browser.msie && window.XDomainRequest) {
+          var xdr;
+          return {
+              send: function( headers, completeCallback ) {
+                  // Use Microsoft XDR
+                  xdr = new XDomainRequest();
+                  xdr.open("get", options.url);
+                  xdr.onload = function() {
+                      if(this.contentType.match(/\/xml/)){
+                          var dom = new ActiveXObject("Microsoft.XMLDOM");
+                          dom.async = false;
+                          dom.loadXML(this.responseText);
+                          completeCallback(200, "success", [dom]);
+                      }else{
+                          completeCallback(200, "success", [this.responseText]);
+                      }
+                  };
+                  xdr.ontimeout = function(){
+                      completeCallback(408, "error", ["The request timed out."]);
+                  };
+                  xdr.onerror = function(){
+                      completeCallback(404, "error", ["The requested resource could not be found."]);
+                  };
+                  xdr.send();
+            },
+            abort: function() {
+                if(xdr)xdr.abort();
+            }
+          };
+        }
+      });*/
+      
+      
+      $("abbr.timeago").timeago();
+      $('#RefreshData').unbind('click')
+      $('#RefreshData').bind('click',function() {
+          $('#RefreshData').button('loading')
+          $.get(URL_PXREST_SERVER+"/os/refresh?filename=MatchExtract",function(data) {
+    // encodeURIComponent(.replace('\\','/')
+            window.setTimeout(function () {
+              loadEvents()
+              $('#RefreshData').button('reset')
+            },8000)
+          })
+        })
+        
+      loadEvents()
+
+      
+      $('#idsearch').on('submit',function(event) {
+        event.preventDefault();
+        searchTerm =  $( "input:first" ).val()
+//        console.log(searchTerm)
+        if (searchTerm.length>0) {
+          $('tbody').find('tr').hide()
+          $('.'+searchTerm.toLowerCase()).show()
+          /*var numOfVisibleRows = $('tr:visible').length-1; // -1 for header
+          console.log("rows selected " + numOfVisibleRows)
+          if (numOfVisibleRows==0) {
+            //code
+          }*/
+        } else
+          $('tr').show()
+          
+      })
+            
+          /*  
+            <span class="glyphicon glyphicon-check"></span>
+            <span class="glyphicon glyphicon-camera"></span>
+            <span class="glyphicon glyphicon-bell"></span>
+            */
+      /*$('#myModal').on('hidden.bs.modal', function () {
+          drawChart('chart_div2')
+      })*/
+ /*     $('#wikisearch').on('submit',function(event) {
+        event.preventDefault();
+        searchTerm =  $( "input:first" ).val()
+        console.log(searchTerm)
+        var url="http://en.wikipedia.org/w/api.php?action=parse&format=json&page=" + searchTerm+"&redirects&prop=text&callback=?";
+        $.getJSON(url,function(data){
+          wikiHTML = data.parse.text["*"];
+          $wikiDOM = $("<document>"+wikiHTML+"</document>");
+          console.log($wikiDOM.text().match(/[A-Z]([a-z]+|\.)(?:\s+[A-Z]([a-z]+|\.))*(?:\s+[a-z][a-z\-]+){0,2}\s+[A-Z]([a-z]+|\.)/g))
+          // unique($wikiDOM.text().match(/[A-Za-z]{4,40}\S+/g),10)  //the words
+          infobox= $wikiDOM.find('.infobox')
+          $("#result").append(infobox.html());
+             console.log(infobox.find('.image'))
+             $('#img').append(infobox.find('.image'))
+             $('#myModal').modal('show')
+             $('#chart_div2').html(infobox.find('.image')[0].innerHTML).children(0).addClass('img-circle')
+        });
+        return false;
+      })*/
+      /*$("#camera").camera({
+          resolution: "QVGA", // "QVGA", "VGA", "HD"
+          snap: function(result){
+            googleFileUplaod(result)
+            //console.log(result);
+          },
+          reset: function(result){
+            console.log(result);
+          },
+        });*/
+      })
+      
+      //document.getElementById('files').addEventListener('change', handleFileSelect, false);
+      $('#files').live('change',handleFileSelect)
+      function handleFileSelect(evt) {
+        gapi.client.load('drive', 'v2', function() {
+          var file = evt.target.files[0];
+          // see https://developers.google.com/drive/quickstart-js
+          googleFileUplaod(file);
+        });        
+      }
+      
+      function startAuth() {
+        ga = new GoogleAuth($('#authorize-button'), {
+          callback: makeApiCall
+        }).init();
+      }
+      
+      
+      // Load the API and make an API call.  Display the results on the screen.
+      function makeApiCall() {
+        
+        
+        ga.googlePlusInfo(function(resp) {
+            ME = resp
+            var heading = document.createElement('h4');
+            var image = document.createElement('img');
+            image.src = resp.image.url.slice(0,-2)+'300';
+            image.className = "img-circle"
+                
+            //var image = $('image').attr('src',resp.items[i].image.url).attr('title',resp.items[i].displayName).addClass("img-circle")
+            heading.appendChild(image);
+            heading.appendChild(document.createTextNode(resp.displayName));
+
+            document.getElementById('content').appendChild(heading);
+          })
+        
+        ga.googlePlusInfo(function(resp) {
+            //console.log("resp",resp)
+            for (i=0;i<resp.items.length;i+=1) {
+                var image = document.createElement('img');
+                image.src = resp.items[i].image.url;
+                image.title = resp.items[i].displayName;
+                image.className = "img-circle"
+                document.getElementById('content').appendChild(image);              
+            }
+          }, 'list')
+      
+          
+          gs = new GoogleSpreadsheet($('#sheetframe'),{token:ga.token}).init()
+          gs.list().done(
+                  function(r) {
+                    //console.log('1',r);//$.each(r.feed.entry,function(i,v) {console.log('****',v.title.$t,v.updated.$t,v.author[0].name)\
+                    gs.fetch(1).done(
+                        function (r) {
+                          console.log('2',r,gs.sheetdata)
+                        }
+                      )
+                    gs.to_frame()
+                  })
+          
+          
+          // this allows a pull up of a functioning spreadsheet
+          // https://docs.google.com/a/biometix.com/spreadsheet/ccc?key=0Ar_X23JcypxMdFRVd0p3amdEMjBjenJ4UENzWm4zYkE&rm=minimal#gid=0
+          
+          
+          //url = 'https://picasaweb.google.com/data/feed/api/user/default?access_token=' + token+'&alt=json';
+          
+          //albumid = "1000000436725483" // gphoto$id
+          //url = 'https://picasaweb.google.com/data/feed/api/user/default/albumid/'+albumid+'/?access_token=' + token+'&alt=json';
+          //url = 'https://picasaweb.google.com/data/feed/api/user/default?kind=photo&tag=Ted Dunstone&access_token=' + token+'&alt=json';
+          
+          //https://picasaweb.google.com/data/feed/api/user/userID?kind=photo&tag=foo,bar
+          //$.get(url,function(r){PHOTOS=r})
+
+          //This gives a list of all worksheets inside the Spreadsheet, does not give actual data
+          //var url = 'https://spreadsheets.google.com/feeds/worksheets/' + urlLocation + '/private/full?access_token=' + token;
+      
+          //This gives the data in a list view - change the word list to cells to work from a cell view and see https://developers.google.com/google-apps/spreadsheets/#working_with_cell-based_feeds for details
+          //var url = 'https://spreadsheets.google.com/feeds/list/' + urlLocation + '/od6/private/full?access_token=' + token;
+
+         
+
+      }
+  </script>
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+   s1 = [23];
+ 
+   plot4 = $.jqplot('chart4',[s1],{
+        seriesDefaults: {
+           renderer: $.jqplot.MeterGaugeRenderer,
+           rendererOptions: {
+               min: 0,
+               max: 70,
+               label: 'Requests',
+               intervals:[20, 50, 60, 70],
+               intervalColors:['#66cc66', '#93b75f', '#E7E658', '#cc6666']
+           }
+       }
+   });
+   plot3 = $.jqplot('chart3',[s1],{
+        seriesDefaults: {
+           renderer: $.jqplot.MeterGaugeRenderer,
+           rendererOptions: {
+               min: 0,
+               max: 70,
+               label: 'Responses',
+               intervals:[20, 50, 60, 70],
+               intervalColors:['#66cc66', '#93b75f', '#E7E658', '#cc6666']
+           }
+       }
+   });
+   setInterval(function () {
+        s1 = [Math.floor(Math.random() * (2) + 1)];
+        plot4.series[0].data[0] = [1,s1]; //here is the fix to your code
+        plot4.replot();
+        
+        s1 = [Math.floor(Math.random() * (2) + 1)];
+        plot3.series[0].data[0] = [1,s1]; //here is the fix to your code
+        plot3.replot();
+
+    }, 100);
+});
+         
+  </script>
+
+  <P></P><p></p>
+  <!--<center><img width=400 src="http://verifiedvision.com/img/logo.png"></center><P></p><P></p>-->
+  <div class="container">
+    <!-- Static navbar -->
+
+    <div class="navbar navbar-default hidden-print">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"></button> <a class="navbar-brand" href="#">
+        Open Biometrics Broker v1</a>
+      </div>
+
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Preferences</a></li>
+          <!--
+
+          <li><a href="#">Notification</a></li>
+
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Examination <b class="caret"></b></a>
+
+            <ul class="dropdown-menu">
+              <li><a href="#">Action</a></li>
+
+              <li><a href="#">Another action</a></li>
+
+              <li><a href="#">Results</a></li>
+
+              <li class="dropdown-header">Nav header</li>
+
+              <li><a href="#">Separated link</a></li>
+
+              <li><a href="#">One more separated link</a></li>
+            --></ul>
+          </li>
+        </ul>
+
+        <ul class="nav navbar-nav navbar-right">
+          <form action='' class="navbar-form navbar-left" role="search" id='idsearch'>
+      <div class="form-group">
+        <input type="text" class="form-control" placeholder="Search">
+      </div>
+      <div class="form-group search-close">
+          <span class="close">&times;</span>
+      </div>
+      
+      <button type="submit" class="btn btn-primary">Search</button>
+      <a class="btn btn-warning" href="/init/default/user/logout">Logout</a>
+    </form>
+        </ul>
+      </div><!--/.nav-collapse -->
+    </div><!-- Main component for a primary marketing message or call to action -->
+
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="panel panel-primary" >
+          <div class="panel-heading">
+            Match Report Queues
+             <button id="RefreshData" class="btn btn-info" data-loading-text="Please wait: Updating data ...">
+              Update
+            </button>
+            <button type="button" class="close pull-right" aria-hidden="true">&times;</button>            
+          </div>
+
+          <div class="panel-body" id="results">
+            <ul class="nav nav-tabs">
+              <li class="active"><a href="#Overview" data-toggle="tab">Overview</a></li>
+              <li><a href="#Requests" data-toggle="tab">Requests</a></li>
+              <li><a href="#Response" data-toggle="tab">Response</a></li>
+              <li><a href="#Errors" data-toggle="tab">Errors</a></li>
+              <li><a href="#Queue" data-toggle="tab">Queue</a></li>
+              <li><a href="#Intro" data-toggle="tab">Introduction</a></li>
+            </ul>
+            <div class="tab-content" style="height:500px;overflow:scroll;">
+              <div class="tab-pane active" id="Overview">
+                 <div style="width: 100%; overflow: hidden;">
+                    <div style="width: 500px; height:300px; float: left;"  id="chart4"></div>
+                    <div style="margin-left: 501px;width: 50%;height:300px; " id="chart3"></div>
+                    <div style="width: 500px; height:300px; float: left;"  >Start</div>
+                    <div style="margin-left: 501px;width: 50%;height:300px; ">End</div>
+                
+                </div>
+                 
+              </div>
+              <div class="tab-pane" id="Requests">
+                <table class="table table-condensed table-hover">
+                  <thead>
+                    <tr>
+                   <th>Date</th>
+                      <th>From_Country</th>
+                      <th>To_Queue</th>
+                      <th>Priority</th>
+                      <th>Type</th>
+                      <th>Message</th>
+                      <th></th>
+                     </tr>
+                  </thead>
+                  <tbody class="results">
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-pane" id="Response">
+                <table class="table table-condensed table-hover">
+                  <thead>
+                    <tr>
+                   <th>Date</th>
+                      <th>BAMSID</th>
+                      <th>Client Name</th>
+                      <th>Location</th>
+                      <th>Caseload</th>
+                      <th>Specialist</th>
+                      <th></th>
+                     </tr>
+                  </thead>
+                  <tbody class="results">
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-pane" id="Error">
+                <table class="table table-condensed table-hover">
+                  <thead>
+                    <tr>
+                   <th>Date</th>
+                      <th>BAMSID</th>
+                      <th>Client Name</th>
+                      <th>Location</th>
+                      <th>Caseload</th>
+                      <th>Specialist</th>
+                      <th></th>
+                     </tr>
+                  </thead>
+                  <tbody class="results">
+                  </tbody>
+                </table>
+              </div>
+              <div class="tab-pane" id="Queue">
+                <iframe width=100% height=400 src="http://localhost:15672/#/queues">
+                  
+                </iframe>
+              </div>
+              <div class="tab-pane" id="Intro">
+                <iframe src="http://www.ccv.adobe.com/v1/player/TaAPhooDrED/embed" width="100%" height="400px" frameborder="0" allowfullscreen></iframe>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="panel-footer"> 
+            <!-- Button trigger modal -->
+           
+          </div>
+        </div>
+      </div>
+
+      
+    </div>
+    
+    
+    
+   
+  <div class="modal fade" id="approvalModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Approve and Send</h4>
+        </div>
+        <div class="modal-body">
+          <div id="approvalForm"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-primary" id="sendMail"  data-loading-text="Please wait: Mailing ...">Send</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+  
+  <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Delete Report</h4>
+        </div>
+        <div class="modal-body">
+          <div id="deleteModalText"></div>
+          Are you sure you want to delete this record?
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" id="doDeleteButton" class="btn btn-primary" data-loading-text="Please wait: Deleting ...">Delete</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+    
+  
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Report Update / Review / Approve</h4>
+      </div>
+      <div class="modal-body">
+        
+            <div id="json">
+            </div>
+            <div id="pdfpreview">
+            </div>
+          
+         </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" id="deleteReportButton" class="btn btn-warning">Delete Report</button>
+        <button type="button" id="updateReportButton" class="btn btn-primary" data-loading-text="Please wait: Updating PDF ...">Update PDF</button>
+        <button type="button" id="approveReportButton" class="btn btn-success">Approve Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+  
+   
+    
+  </div><!-- /container <script src="https://apis.google.com/js/client.js?onload=startAuth" type="text/javascript"></script>-->
+  
+  <script>
+function googleTranslateElementInit() {
+new google.translate.TranslateElement({
+pageLanguage: 'en',
+layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+}, 'google_translate_element');
+}
+</script><script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  
+  <div id="google_translate_element"></div>
+</body>
+</html>

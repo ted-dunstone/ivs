@@ -34,6 +34,7 @@ from modules.util import remove_private,returnJson,test_url, test_finished
 from modules.data import PxData
 
 from modules.bias import Verify
+from modules.obb import OpenBiometricBroker
 
 import argparse
 
@@ -112,7 +113,10 @@ class IdentityVerificationService(object):
 		self.jinja_env.filters['hostname'] = get_hostname
 
 		self.pxClasses = [PxData(self.redis),
-						  PxLogin(),Verify(CONFIG,self)]
+						  PxLogin(),
+						  OpenBiometricBroker(CONFIG,self)
+						  #Verify(CONFIG,self)
+						  ]
 
 		self.urls = [
 			Rule('/', endpoint='index'),
