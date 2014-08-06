@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+import pika
+import sys
+
+
+my_exchange=""
+
+
+def sendToMatcher(ch, method, props, body):
+    print ' [*] MatchRequestHandler Received message '+body
+    body=body+" TRANSFORMED"
+    key=(method.routing_key).replace("transform", "match")
+    print " [*] hub_transform sending message "+ body+ " from source "+key
+    ch.basic_publish(exchange='Australia_NZ_Exchange', routing_key=key, body=body)
+
+
+def main(argv):
+ 
+   try:
+      opts, args = getopt.getopt(argv,"i:",["my_agency_id="])
+   except getopt.GetoptError:
+      print 'hub_receiver.py -i<MY_AGENCY_ID> '
+      sys.exit(2)
+   for opt, arg in opts:
+      print arg 
+      if opt == '-h':
+         print 'hub_receiver.py -i<MY_AGENCY_ID> '
+         sys.exit(1)
+      elif opt in ("-i", "--my_agency_id"):
+         my_exchange = arg
+
+   
+   connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
+   channel = connection.channel()
+   channel.exchange_declare(exchange=my_exchange, type='topic')
+   result = channel.queue_declare(exclusive=True)
+   queue_name = result.method.queue
+   channel.queue_bind(exchange=my_exchange, queue=queue_name, routing_key="transform.#")
+
+
+   print ' [*] Waiting for messages. To exit press CTRL+C'
+
+   channel.basic_consume(sendToMatcher, queue_name, no_ack=True)
+   channel.start_consuming()
+
+
+       
+
+if __name__ == "__main__":
+   try:
+      opts, args = getopt.getopt(sys.argv,"i:",["MY_AGENCY_ID="])
+      print args
+   except getopt.GetoptError: 
+      pass    
+   main(sys.argv[1:])
