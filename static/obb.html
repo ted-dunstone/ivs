@@ -704,9 +704,9 @@ $(function ()
        }
    });
    setInterval(function () {
-        $.get('http://localhost:15672/api/overview?lengths_age=600&lengths_incr=5&msg_rates_age=60&msg_rates_incr=5',function(data) {
-          console.log(data.message_stats.publish)
-          console.log(data.message_stats.publish_details.rate)
+        //$.get('http://localhost:15672/api/overview?lengths_age=600&lengths_incr=5&msg_rates_age=60&msg_rates_incr=5',function(data) {
+          //console.log(data.message_stats.publish)
+          //console.log(data.message_stats.publish_details.rate)
           s1 = [Math.floor(Math.random() * (2) + 1)];
           plot4.series[0].data[0] = [1,s1]; //here is the fix to your code
           plot4.replot();
@@ -714,7 +714,7 @@ $(function ()
           s1 = [Math.floor(Math.random() * (2) + 1)];
           plot3.series[0].data[0] = [1,s1]; //here is the fix to your code
           plot3.replot();
-        })
+        //})
     }, 500);
 });
          
