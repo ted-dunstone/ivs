@@ -704,15 +704,18 @@ $(function ()
        }
    });
    setInterval(function () {
-        s1 = [Math.floor(Math.random() * (2) + 1)];
-        plot4.series[0].data[0] = [1,s1]; //here is the fix to your code
-        plot4.replot();
-        
-        s1 = [Math.floor(Math.random() * (2) + 1)];
-        plot3.series[0].data[0] = [1,s1]; //here is the fix to your code
-        plot3.replot();
-
-    }, 100);
+        $.get('http://localhost:15672/api/overview?lengths_age=600&lengths_incr=5&msg_rates_age=60&msg_rates_incr=5',function(data) {
+          console.log(data.message_stats.publish)
+          console.log(data.message_stats.publish_details.rate)
+          s1 = [Math.floor(Math.random() * (2) + 1)];
+          plot4.series[0].data[0] = [1,s1]; //here is the fix to your code
+          plot4.replot();
+          
+          s1 = [Math.floor(Math.random() * (2) + 1)];
+          plot3.series[0].data[0] = [1,s1]; //here is the fix to your code
+          plot3.replot();
+        })
+    }, 500);
 });
          
   </script>
@@ -730,7 +733,9 @@ $(function ()
 
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
+          
           <li class="active"><a href="#">Preferences</a></li>
+          <li><a href="#"><div id="google_translate_element"></div></a></li>
           <!--
 
           <li><a href="#">Notification</a></li>
@@ -765,6 +770,7 @@ $(function ()
       
       <button type="submit" class="btn btn-primary">Search</button>
       <a class="btn btn-warning" href="/init/default/user/logout">Logout</a>
+      
     </form>
         </ul>
       </div><!--/.nav-collapse -->
@@ -775,11 +781,12 @@ $(function ()
       <div class="col-md-12">
         <div class="panel panel-primary" >
           <div class="panel-heading">
-            Match Report Queues
+            Broker Status and Queues
              <button id="RefreshData" class="btn btn-info" data-loading-text="Please wait: Updating data ...">
               Update
             </button>
             <button type="button" class="close pull-right" aria-hidden="true">&times;</button>            
+            
           </div>
 
           <div class="panel-body" id="results">
@@ -796,8 +803,8 @@ $(function ()
                  <div style="width: 100%; overflow: hidden;">
                     <div style="width: 500px; height:300px; float: left;"  id="chart4"></div>
                     <div style="margin-left: 501px;width: 50%;height:300px; " id="chart3"></div>
-                    <div style="width: 500px; height:300px; float: left;"  >Start</div>
-                    <div style="margin-left: 501px;width: 50%;height:300px; ">End</div>
+                    <div style="width: 500px; height:300px; float: left;"  ><center>Match Requests Per Minute</center></div>
+                    <div style="margin-left: 501px;width: 50%;height:300px; "><center>Match Responses Per Minute</center></div>
                 
                 </div>
                  
@@ -836,7 +843,7 @@ $(function ()
                   </tbody>
                 </table>
               </div>
-              <div class="tab-pane" id="Error">
+              <div class="tab-pane" id="Logs">
                 <table class="table table-condensed table-hover">
                   <thead>
                     <tr>
@@ -853,6 +860,7 @@ $(function ()
                   </tbody>
                 </table>
               </div>
+              
               <div class="tab-pane" id="Queue">
                 <iframe width=100% height=400 src="http://localhost:15672/#/queues">
                   
@@ -865,9 +873,9 @@ $(function ()
 
           </div>
 
-          <div class="panel-footer"> 
+          <div class="panel-footer" style="height:50px"> 
             <!-- Button trigger modal -->
-           
+              <a class="pull-right" href="#"><img width=150 src="/static/img/biometixlogo.png"></a>
           </div>
         </div>
       </div>
@@ -955,6 +963,6 @@ layout: google.translate.TranslateElement.InlineLayout.SIMPLE
 }
 </script><script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
   
-  <div id="google_translate_element"></div>
+  
 </body>
 </html>
