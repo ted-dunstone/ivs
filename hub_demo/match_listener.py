@@ -42,7 +42,7 @@ def main(argv):
 	my_exchange=""
 
 	try:
-		opts, args = getopt.getopt(argv,"i:",["my_agency_id="])
+		opts, args = getopt.getopt(argv,"e:",["my_exchange_id="])
 	except getopt.GetoptError:
 		print 'match_listener.py -i<MY_AGENCY_ID> '
 		sys.exit(2)
@@ -51,7 +51,7 @@ def main(argv):
 		if opt == '-h':
 			print 'match_listener.py -i<MY_AGENCY_ID> '
 			sys.exit(1)
-		elif opt in ("-i", "--my_agency_id"):
+		elif opt in ("-e", "--my_exchange_id"):
 			my_exchange = arg
 
 	match_listener = MatchResultHandler(my_exchange)
@@ -68,3 +68,5 @@ if __name__ == "__main__":
 	except getopt.GetoptError:
 		pass
 	main(sys.argv[1:])
+
+

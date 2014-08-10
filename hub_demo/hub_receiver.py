@@ -2,12 +2,16 @@
 import pika
 import sys
 import getopt
+import uuid
+import threading
+import os
 
 
-class HubReceiver(object):
+class HubReceiver(threading.Thread):
 
 
     def __init__(self, my_exchange):
+        threading.Thread.__init__(self)
 	self.connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
 	self.channel = self.connection.channel()
 	self.channel.exchange_declare(exchange=my_exchange, type='topic')
@@ -19,7 +23,7 @@ class HubReceiver(object):
 #	self.channel.basic_consume(onRequest, self.queue_name, no_ack=True)
 
 
-    def waitRequest(self):
+    def run(self):
         print ' [*] Hub waiting for messages. To exit press CTRL+C... Exchange is '+self.my_exchange
 	self.channel.start_consuming()
 
@@ -37,22 +41,22 @@ class HubReceiver(object):
 #    ch.basic_publish(exchange=my_exchange, routing_key=key, body=body)
 
 
-def main(argv):
+#def main(argv):
  
-   my_exchange=""
+#   my_exchange=""
 
-   try:
-      opts, args = getopt.getopt(argv,"i:",["my_agency_id="])
-   except getopt.GetoptError:
-      print 'hub_receiver.py -i<MY_AGENCY_ID> '
-      sys.exit(2)
-   for opt, arg in opts:
-      print arg 
-      if opt == '-h':
-         print 'hub_receiver.py -i<MY_AGENCY_ID> '
-         sys.exit(1)
-      elif opt in ("-i", "--my_agency_id"):
-         my_exchange = arg
+#   try:
+#      opts, args = getopt.getopt(argv,"i:",["my_agency_id="])
+#   except getopt.GetoptError:
+#      print 'hub_receiver.py -i<MY_AGENCY_ID> '
+#      sys.exit(2)
+#   for opt, arg in opts:
+#      print arg 
+#      if opt == '-h':
+#         print 'hub_receiver.py -i<MY_AGENCY_ID> '
+#         sys.exit(1)
+#      elif opt in ("-i", "--my_agency_id"):
+#         my_exchange = arg
    
 #   connection = pika.BlockingConnection(pika.ConnectionParameters(host='localhost'))
 #   channel = connection.channel()
@@ -64,14 +68,14 @@ def main(argv):
 #   channel.basic_consume(on_request, queue_name, no_ack=True)
 #   channel.start_consuming()
 
-   hub = HubReceiver(my_exchange)
-   hub.waitRequest()
+#   hub = HubReceiver(my_exchange)
+#   hub.waitRequest()
        
 
-if __name__ == "__main__":
-   try:
-      opts, args = getopt.getopt(sys.argv,"i:",["MY_AGENCY_ID="])
-      print args
-   except getopt.GetoptError: 
-      pass    
-   main(sys.argv[1:])
+#if __name__ == "__main__":
+#   try:
+#      opts, args = getopt.getopt(sys.argv,"i:",["MY_AGENCY_ID="])
+#      print args
+#   except getopt.GetoptError: 
+#      pass    
+#   main(sys.argv[1:])
