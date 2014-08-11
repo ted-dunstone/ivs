@@ -114,8 +114,8 @@ class IdentityVerificationService(object):
 
 		self.pxClasses = [PxData(self.redis),
 						  PxLogin(),
-						  OpenBiometricBroker(CONFIG,self)
-						  #Verify(CONFIG,self)
+						  OpenBiometricBroker(CONFIG,self),
+						  Verify(CONFIG,self)
 						  ]
 
 		self.urls = [

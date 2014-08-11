@@ -67,28 +67,18 @@ video, img, #startbutton {
 
 		  {%if action.name=='Authentication Service'%}
 		  <div class="form-group">
-            <label class="col-sm-2 control-label" for="textinput">Request Organisations</label>
-            <div class="col-sm-4">
-          <select>
-			<option value="all" selected>All</option>
-			<option value="Drivers Licences">- Driver Licence</option>
-			<option value="Passports">- Passports</option>
-			<option value="Immigration">- Immigration</option>
-			<option value="Immigration">- Police</option>
-		</select>
-			</div>
-
-            <label class="col-sm-2 control-label" for="textinput">Request Locations</label>
-            <div class="col-sm-4">
-          <select>
-			<option value="all" selected>All</option>
-			<option value="Drivers Licences">- NSW</option>
-			<option value="Passports">- VIC</option>
-			<option value="Immigration">- QLD</option>
-			<option value="Immigration">- SA</option>
+            <label class="col-sm-2 control-label" for="textinput">Request Exchange</label>
+            <div class="col-sm-10">
+          <select name="Exchange">
+			<option value="BALI PROCESS IMMIGRATION (GROUP)">BALI PROCESS IMMIGRATION (GROUP) </option>
+			<option value="AUSTRALIAN_IMMIGRATION">AUSTRALIAN_IMMIGRATION</option>
+			<option value="THAILAND_IMMIGRATION">THAILAND_IMMIGRATION</option>
+			<option value="INDONESIAN_IMMIGRATION">INDONESIAN_IMMIGRATION </option>
 		</select>
 			</div>
 		  </div>
+
+            
 
 		  <div class="form-group">
             <label class="col-sm-2 control-label" for="textinput">Match Type</label>

@@ -8,7 +8,7 @@ from betaface import BetaFaceAPI
 from json import JSONEncoder
 from collections import namedtuple
 import base64
-import time
+import time,datetime
 from subprocess import call
 
 
@@ -515,6 +515,7 @@ class Verify(object):
     def on_verify(self, request):
         import base64,re
         import random
+        import string
 
         print str(request.form.to_dict())
         file = request.files.get('image')
@@ -530,7 +531,13 @@ class Verify(object):
             imgdata=re.search(r'base64,(.*)', request.form['cameraImage']).group(1)
             SubjectID= request.form.get('Identity.SubjectID')
             ext = '.png'
-
+        data=json.load(open('static/data/pendingreports.json'))
+        client_id=random.randint(100000000,999999999)
+        form_val = request.form.to_dict()
+        
+        data['Requests'].append(self.logstruct(client_id,form_val["Exchange"],"Thailand_Immigration",string.capwords(form_val["Exchange"],'_'),'Sent OK'))
+        data['Response'].append(self.logstruct(client_id,form_val["Exchange"], string.capwords(form_val["Exchange"],'_'),"Thailand_Immigration",'Match OK'))
+        json.dump(data,open('static/data/pendingreports.json','w'))
         imagename=storeimage('submit_'+str(random.random())+'_'+SubjectID+ext,base64.b64decode(imgdata))
 
         NISTResult={}
@@ -556,4 +563,81 @@ class Verify(object):
     def on_assert(self, request):
         assert(False);
         pass
+    
+    def logstruct(self, client_id, exchange, to_loc, from_loc, message):
+        return {
+            "REPORT_DATE_UTC": str(datetime.datetime.utcnow()),
+            "CLIENT_ACQUISITION_LOCATION": "NOT_SPECIFIED",
+            "CLIENT_BAMSID": "aaa", #random.randint(),
+            "CLIENT_PLACE_OF_BIRTH": "",
+            "CLIENT_STATUS": "Assigned",
+            "CLIENT_CLIENT_BUSINESS_CONTEXT": "DETENTION",
+            "NAFIS_RESULT": "",
+            "CLIENT_VLN": "",
+            "DATE_OF_BIRTH": "09/08/1970",
+            "GIVEN_NAME": "DUPLICATING WORKFLOW",
+            "CLIENT_CNI": "395569751",
+            "CLIENT_CNIVLN": "22345683447",
+            "CLIENT_CASELOAD": "Australian_Immigration",
+            "ISR_ID": "",
+            "EMAIL": "",
+            "DEVICE_ID": "001115600.B2011",
+            "ENROLLER_ID": "eric",
+            "CLIENT_MATCHES": "1396853967961 ,\n1396847395711 ,\n1396847338399 ,\n1396853988165 ,\n1396847299618 ,\n1396847243227",
+            "ICSE_ID": "_22345683447",
+            "CLIENT_RESULT_TYPE": "BAMS_Face",
+            "PASSPORT_NUMBER": "",
+            "nocache": "0.308418617652",
+            "VLN": "",
+            "GENDER": "Male",
+            "IMAGE": "<img width=200 src='http:127.0.0.1/init/autoreportUtil/ShowImage.jpg?person_number=1396920962077'>",
+            "ACQUISITION_DATE": "08/04/2014 11:35:55 AM",
+            "CLIENT_ICSE_ID": "_22345683447",
+            "filename": "c:\\Performix\\Px4\\applications\\DIAC\\static\\incoming\\1396920962077.json",
+            "CLIENT_REPORT_DATE_UTC": str(datetime.datetime.utcnow()),
+            "COUNTRY_OF_BIRTH": "TONGA",
+            "CLIENT_FAMILY_NAME": "ENROLMENT",
+            "NATIONALITY": "TONGA",
+            "CLIENT_DATE_OF_BIRTH": "09/08/1970",
+            "STATUS": "Assigned",
+            "CLIENT_REPORT_DATE": "06/08/2014",
+            "CLIENT_BUSINESS_CONTEXT": "DETENTION",
+            "CLIENT_DEVICE_ID": "001115600.B2011",
+            "CLIENT_url": "/DIAC/static/incoming/1396920962077.json",
+            "ACQUISITION_LOCATION": to_loc,
+            "BAMSID": str(client_id),
+            "PLACE_OF_BIRTH": "",
+            "CLIENT_NAFIS_RESULT": "",
+            "CLIENT_ENROLMENT_DATE_UTC": "2014-04-08 11:36:02 AM",
+            "REPORT_DATE": "06/08/2014",
+            "CLIENT_BAMS_ID": "_1396920962077",
+            "CLIENT_EMAIL": "",
+            "CLIENT_GIVEN_NAME": "DUPLICATING WORKFLOW",
+            "CNIVLN": "22345683447",
+            "CLIENT_ISR_ID": "",
+            "FCC_COUNTRY": "",
+            "CNI": "395569751",
+            "CLIENT_NATIONALITY": "TONGA",
+            "FAMILY_NAME": exchange,
+            "CLIENT_GENDER": "Male",
+            "CLIENT_IMAGE": "<img width=200 src='http:127.0.0.1/init/autoreportUtil/ShowImage.jpg?person_number=1396920962077'>",
+            "EXPERT": message,
+            "CASELOAD": from_loc,
+            "BAMS_ID": "_1396920962077",
+            "CLIENT_ACQUISITION_DATE": "08/04/2014 11:35:55 AM",
+            "CLIENT_EXPERT": "pradeep",
+            "ENROLMENT_DATE_UTC": str(datetime.datetime.now()),
+            "CLIENT_nocache": "0.308418617652",
+            "MATCHES": "1396853967961 ,\n1396847395711 ,\n1396847338399 ,\n1396853988165 ,\n1396847299618 ,\n1396847243227",
+            "CLIENT_ENROLMENT_DATE": "08/04/2014 11:36:02 AM",
+            "CLIENT_COUNTRY_OF_BIRTH": "TONGA",
+            "CLIENT_filename": "c:\\Performix\\Px4\\applications\\DIAC\\static\\incoming\\1396920962077.json",
+            "ENROLMENT_DATE": "08/04/2014 11:36:02 AM",
+            "url": "/DIAC/static/incoming/1396920962077.json",
+            "CLIENT_ENROLLER_ID": "eric",
+            "CLIENT_PASSPORT_NUMBER": "",
+            "RESULT_TYPE": "BAMS_Face",
+            "CLIENT_FCC_COUNTRY": ""
+        }
+    
 

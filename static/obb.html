@@ -41,9 +41,11 @@
     }
     
   </style>
+  <!--  /static/img/fingerprint_malware.jpg -->
+
   <style>
     body { 
-        background: url('http://www.bitrebels.com/wp-content/uploads/2013/02/biometric-fingerprint-store-purchases-4.jpg') no-repeat center center fixed; 
+        background: url('/static/img/fingerprint-bkg.jpg') no-repeat center center fixed; 
         -webkit-background-size: cover;
         -moz-background-size: cover;
         -o-background-size: cover;
@@ -89,7 +91,7 @@
 <script>
  /// GLOBALS
  
-  URL_EVENT_QUEUE_JSON = '/DIAC/static/pendingreports.json'
+  URL_EVENT_QUEUE_JSON = '/static/data/pendingreports.json'
   URL_PXREST_SERVER = "http://"+window.location.host+":8081"
   jQuery.support.cors = true; 
 /*  $.get("/init/autoreports/islogin.json",function(data) {
@@ -678,7 +680,7 @@ $(function ()
   <script type="text/javascript">
     $(document).ready(function(){
    s1 = [23];
- 
+   
    plot4 = $.jqplot('chart4',[s1],{
         seriesDefaults: {
            renderer: $.jqplot.MeterGaugeRenderer,
@@ -696,25 +698,26 @@ $(function ()
            renderer: $.jqplot.MeterGaugeRenderer,
            rendererOptions: {
                min: 0,
-               max: 70,
+               max: 500,
                label: 'Responses',
-               intervals:[20, 50, 60, 70],
+               intervals:[400, 450, 480, 500],
                intervalColors:['#66cc66', '#93b75f', '#E7E658', '#cc6666']
            }
        }
    });
    setInterval(function () {
-        //$.get('http://localhost:15672/api/overview?lengths_age=600&lengths_incr=5&msg_rates_age=60&msg_rates_incr=5',function(data) {
-          //console.log(data.message_stats.publish)
-          //console.log(data.message_stats.publish_details.rate)
-          s1 = [Math.floor(Math.random() * (2) + 1)];
+        loadEvents()
+        $.get('/rabbit/overview?lengths_age=600&lengths_incr=5&msg_rates_age=60&msg_rates_incr=5',function(data) {
+          console.log(data.message_stats.publish)
+          console.log(data.message_stats.publish_details.rate)
+          s1 = [data.message_stats.publish_details.rate];
           plot4.series[0].data[0] = [1,s1]; //here is the fix to your code
           plot4.replot();
           
-          s1 = [Math.floor(Math.random() * (2) + 1)];
+          s1 = [data.message_stats.publish];
           plot3.series[0].data[0] = [1,s1]; //here is the fix to your code
           plot3.replot();
-        //})
+        })
     }, 500);
 });
          
@@ -792,6 +795,7 @@ $(function ()
           <div class="panel-body" id="results">
             <ul class="nav nav-tabs">
               <li class="active"><a href="#Overview" data-toggle="tab">Overview</a></li>
+              <li><a href="#Log" data-toggle="tab">Log</a></li>
               <li><a href="#Requests" data-toggle="tab">Requests</a></li>
               <li><a href="#Response" data-toggle="tab">Response</a></li>
               <li><a href="#Errors" data-toggle="tab">Errors</a></li>
@@ -804,20 +808,23 @@ $(function ()
                     <div style="width: 500px; height:300px; float: left;"  id="chart4"></div>
                     <div style="margin-left: 501px;width: 50%;height:300px; " id="chart3"></div>
                     <div style="width: 500px; height:300px; float: left;"  ><center>Match Requests Per Minute</center></div>
-                    <div style="margin-left: 501px;width: 50%;height:300px; "><center>Match Responses Per Minute</center></div>
+                    <div style="margin-left: 501px;width: 50%;height:300px; "><center>Total Responses</center></div>
                 
                 </div>
                  
+              </div>
+               <div class="tab-pane" id="Log">
+                <iframe src="/log" width="100%" height="400px" frameborder="0" allowfullscreen></iframe>
               </div>
               <div class="tab-pane" id="Requests">
                 <table class="table table-condensed table-hover">
                   <thead>
                     <tr>
                    <th>Date</th>
-                      <th>From_Country</th>
-                      <th>To_Queue</th>
-                      <th>Priority</th>
-                      <th>Type</th>
+                      <th>Client ID</th>
+                      <th>Exchange</th>
+                      <th>From</th>
+                      <th>To</th>
                       <th>Message</th>
                       <th></th>
                      </tr>
@@ -831,11 +838,11 @@ $(function ()
                   <thead>
                     <tr>
                    <th>Date</th>
-                      <th>BAMSID</th>
-                      <th>Client Name</th>
-                      <th>Location</th>
-                      <th>Caseload</th>
-                      <th>Specialist</th>
+                      <th>Client ID</th>
+                      <th>Exchange</th>
+                      <th>From</th>
+                      <th>To</th>
+                      <th>Message</th>
                       <th></th>
                      </tr>
                   </thead>
@@ -843,16 +850,16 @@ $(function ()
                   </tbody>
                 </table>
               </div>
-              <div class="tab-pane" id="Logs">
+              <div class="tab-pane" id="Errors">
                 <table class="table table-condensed table-hover">
                   <thead>
                     <tr>
                    <th>Date</th>
-                      <th>BAMSID</th>
-                      <th>Client Name</th>
-                      <th>Location</th>
-                      <th>Caseload</th>
-                      <th>Specialist</th>
+                      <th>Client ID</th>
+                      <th>Exchange</th>
+                      <th>From</th>
+                      <th>To</th>
+                      <th>Message</th>
                       <th></th>
                      </tr>
                   </thead>
@@ -862,7 +869,7 @@ $(function ()
               </div>
               
               <div class="tab-pane" id="Queue">
-                <iframe width=100% height=400 src="http://localhost:15672/#/queues">
+                <iframe width=100% height=400 src="http://localhost:15672/">
                   
                 </iframe>
               </div>
