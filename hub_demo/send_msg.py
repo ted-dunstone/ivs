@@ -84,6 +84,8 @@ class MessageBroker(object):
             self.response = body
             
     def start_consume(self,queue_name):
+        channel.basic_qos(prefetch_count=1)
+        
         self.channel.basic_consume(self.on_recieve_callback,
                               queue = queue_name,
                               no_ack=True)
