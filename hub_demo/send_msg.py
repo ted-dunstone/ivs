@@ -24,27 +24,32 @@ class MessageQueue(object):
         self.corr_dict = {}
         print "start node %s"%node_name
 
-    def create_queue(self, exchange):
+    def log(self, msg):
+        print self.node_name + ' : ' + msg
+    
+    def create_queue(self, exchange, name=''):
         self.channel.exchange_declare(exchange=exchange, type='headers')
+        #result = self.channel.queue_declare( queue=name,exclusive=True,auto_delete=False)
         result = self.channel.queue_declare(exclusive=True)
         if not result:
             print 'Queue didnt declare properly!'
             sys.exit(1)
-        return result.method.queue
+        return result
 
     def send(self, exchange, message, header={}, callback=False):
         callback_queue = None
-        self.create_queue(exchange)
+        callback_name = ''
+        #self.create_queue(exchange)
         self.response = None
 
         if (callback):
             callback_queue = self.create_queue(exchange)
+            callback_name = callback_queue.method.queue
             self.channel.basic_consume(self.on_response_callback,
-                              queue = callback_queue,
+                              queue = callback_name,
                               no_ack=True)
-
-        header.update({self.node_name:True,
-                       "from_node":self.node_name,
+        header.update({
+                       "last_node":self.node_name,
                        "destination":exchange})
         self.corr_id = str(uuid.uuid4())
         self.corr_dict[self.corr_id]=True
@@ -53,19 +58,21 @@ class MessageQueue(object):
                                 body=message,
                                 properties = pika.BasicProperties(
                                 headers = header,
-                                reply_to = callback_queue,
+                                reply_to = callback_name,
                                 correlation_id = self.corr_id,
                                 user_id = self.user_id)
                             )
-        print " [x] Sent %r to %s" % (message,exchange)
+        self.log(" [x] Sent %r to %s" % (message,exchange))
 
         if (callback):
             while self.response is None:
                 self.connection.process_data_events()
-            print "Response:"+str(self.response)
+            #print "Response:"+str(self.response)
+            #print str(dict(callback_queue))
+            #self.callback_queue.delete()
 
     def queue_bind(self, exchange, header_match={}):
-        queue_name = self.create_queue(exchange)
+        queue_name = self.create_queue(exchange,self.node_name).method.queue
         header_match.update({'x-match':'any'})
 
         self.channel.queue_bind(exchange=exchange,
@@ -94,7 +101,7 @@ class MessageQueue(object):
                          body=str(self.on_return_status(properties)))
 
     def on_response_callback(self, ch, method, props, body):
-        print "[x] response %s,%s"%(props.correlation_id,str(self.corr_dict))
+        #self.log("[x] response %s,%s"%(props.correlation_id,str(self.corr_dict)))
         if props.correlation_id in self.corr_dict:
             #del self.corr_dict[props.correlation_id]
             self.response = body
@@ -109,7 +116,7 @@ class MessageQueue(object):
         try:
             self.channel.start_consuming()
         except KeyboardInterrupt:
-            print 'Bye'
+            self.log('Bye')
         finally:
             self.connection.close()
 
@@ -124,7 +131,7 @@ class MessageBrokerBase(MessageQueue):
         super(MessageBrokerBase, self).__init__(node_name, user_id)
         self.exchange_name = exchange_name
         self.request_queue=self.queue_bind(self.exchange_name, header)
-        print self.__class__.__name__
+        self.log( self.__class__.__name__)
 
     def start(self, ):
         self.start_consume(self.request_queue)
@@ -145,12 +152,14 @@ class Broker(MessageBrokerBase):
 
 class Matcher(MessageBrokerBase):
     def __init__(self, node_name, user_id="guest",header={},exchange_name = IDENTIFY_EXCHANGE_NAME):
+        header.update({"from_node":node_name})
         super(Matcher, self).__init__(node_name, user_id,header, exchange_name)
         
     def on_recieve_callback(self, ch, method, properties, body):
         super(Matcher,self).on_recieve_callback(ch, method, properties, body)
-        body = "Match score = %f from %s"%(random.random(),self.node_name)
-        self.send(RESULTS_EXCHANGE_NAME, body, properties.headers)
+        if not(self.node_name in properties.headers): # make sure not to match our own request
+            body = "Match score = %f from %s"%(random.random(),self.node_name)
+            self.send(RESULTS_EXCHANGE_NAME, body, properties.headers)
 
 
 class Requester(MessageQueue):
@@ -158,6 +167,7 @@ class Requester(MessageQueue):
         super(Requester, self).__init__(node_name, user_id)
 
     def send(self, msg,header):
+        header.update({self.node_name:True})
         super(Requester,self).send(REQUEST_EXCHANGE_NAME,msg,header,True)
 
 class Receiver(MessageBrokerBase):
@@ -166,8 +176,8 @@ class Receiver(MessageBrokerBase):
 
     def on_recieve_callback(self, ch, method, properties, body):
         super(Receiver,self).on_recieve_callback(ch, method, properties, body)
-        print "**** Result from %s"%(str(properties.headers))
-        print body
+        #self.log("**** Result from %s"%(str(properties.headers)))
+        self.log(body)
 
 
 if __name__ == "__main__":
@@ -211,17 +221,18 @@ if __name__ == "__main__":
 
     header={"test":"test"}
     if args.is_matcher:
-        matcher = Matcher(args.name,"t1@t1.com",header)
+        matcher = Matcher(args.name,args.name,header)
         matcher.start()
     elif args.is_broker:
-        broker = Broker("t1@t1.com",header)
+        broker = Broker("broker",header)
         #queue=broker.queue_bind(dest_queue, header)
         broker.start() #_consume(queue)
     elif args.is_requester:
-        requester = Requester(args.name,"t1@t1.com")
+        requester = Requester(args.name,args.name)
         requester.send("Hello",header)
+        
     elif args.is_receiver:
-        receiver = Receiver(args.name,"t1@t1.com",{args.name:True})
+        receiver = Receiver(args.name,args.name,{args.name:True})
         receiver.start()
     #sendRequest(my_queue, dest_queue, priority, m_type, d_file)
 

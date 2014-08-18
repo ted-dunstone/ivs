@@ -2,56 +2,55 @@
 import pika
 import sys
 import getopt
-from hub_master import HubMaster
 import threading
+from subprocess import check_call
 
 
-class ClientTask (threading.Thread):
+VERSION = 0.8
 
-
-
-
+COUNTRIES = ['test@Immi.gov.au','test@Immi.gov.my','test@Immi.gov.id','test@Immi.gov.th']
 
 class Simulator(object):
 
 
-     #pass in the list of hub/server exchanges, client exchanges, and request types (i.e, match, enrol, etc..-). 
-    def __init__(self, server_exchanges, client_exchanges, requests ):
-        self.server_exchanges=server_exchanges
-        self.client_exchanges=client_exchanges
-        self.requests=requests
-        self.hub_master = HubMaster("MasterControl", server_exchanges)
-
+     #pass in the list of hub/server exchanges, client exchanges, and request types (i.e, match, enrol, etc..-).
+    def __init__(self, countries ):
+        check_call('pkill -f python',shell=True)
+        check_call('python send_msg.py -b &',shell=True)
+                
+        for c in countries:
+            print "*****"+c
+            check_call('python rabbitmqadmin.py declare user name="%s" password="guest" tags=""'%c,shell=True)
+            s = 'python rabbitmqadmin.py declare permission vhost="/" user="%s" configure=".*" write=".*" read=".*"'%c
+            check_call(s,shell=True)
+            
+            check_call('python send_msg.py -m -n "%s" &'%c,shell=True)
+            check_call('python send_msg.py -e -n "%s" &'%c,shell=True)
+        for i in range(1,5):
+            for c in countries:
+                check_call('python send_msg.py -r -n "%s" &'%c,shell=True)
+            
 
 
     def getExchangeStats(self, exchange):
         pass
- 
 
-
-def main(argv):
-
-   try:
-      opts, args = getopt.getopt(argv,"s:c:",["server_exchanges=", "client_exchanges="])
-   except getopt.GetoptError:
-      print 'simulator.py -s<EXC_ID1>:<EXC_ID2>:...:<EXC_IDX> -c <CLI_EXC_ID1>:<CLI_EXC_ID2>:...:<CLI_EXC_IDX> '
-      sys.exit(2)
-   for opt, arg in opts:
-      print arg
-      if opt == '-h':
-         print 'simulator.py -s<EXC_ID1>:<EXC_ID2>:...:<EXC_IDX> -c <CLI_EXC_ID1>:<CLI_EXC_ID2>:...:<CLI_EXC_IDX> '
-         sys.exit(1)
-      elif opt in ("-e", "--server_exchanges="):
-         exchange_list = arg
 
 
 
 if __name__ == "__main__":
-   try:
-      opts, args = getopt.getopt(sys.argv,"s:c:",["server_exchanges=", "client_exchanges="])
-      print args
-   except getopt.GetoptError:
-      pass
-   main(sys.argv[1:])
+    import argparse
 
 
+    # Parse command line args
+    # note that args can be read from a file using the @ command
+    parser = argparse.ArgumentParser(description='Identity Verification Service',fromfile_prefix_chars='@')
+    parser.add_argument('--port','-p', default=8000,
+                                       help='set the port (default 8000)')
+
+    parser.add_argument('--version', action='version', version='%(prog)s '+str(VERSION))
+
+    args = parser.parse_args()
+    
+    s = Simulator(COUNTRIES)
+    
