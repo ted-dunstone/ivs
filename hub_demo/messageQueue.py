@@ -41,7 +41,7 @@ class MessageQueue(object):
             sys.exit(1)
         return result
 
-    def send(self, exchange, message, header={}, callback=False):
+    def send(self, exchange, message, header={}, callback=False,routing_key=''):
         callback_queue = None
         callback_name = ''
         self.response = None
@@ -58,7 +58,7 @@ class MessageQueue(object):
         self.corr_id = str(uuid.uuid4())
         self.corr_dict[self.corr_id]=True
         self.channel.basic_publish(exchange=exchange,
-                                routing_key='',
+                                routing_key=routing_key,
                                 body=message,
                                 properties = pika.BasicProperties(
                                 headers = header,
@@ -75,7 +75,7 @@ class MessageQueue(object):
             #print str(dict(callback_queue))
             #self.callback_queue.delete()
 
-    def queue_bind(self, exchange, header_match={}):
+    def queue_bind(self, exchange, header_match={},routing_key=''):
         print str(exchange)
         #self.channel.exchange_declare(exchange=exchange["name"], type=exchange["ex_type"])
         #self.create_queue(self.node_name)
@@ -83,7 +83,7 @@ class MessageQueue(object):
 
         self.channel.queue_bind(exchange=exchange["name"],
                            queue = self.queue_name,
-                           routing_key = '',
+                           routing_key = routing_key,
                            arguments = header_match)
         return self.queue_name
 

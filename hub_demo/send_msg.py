@@ -17,13 +17,13 @@ RESULTS_EXCHANGE = {"name":"Results", "ex_type":"headers"}
 EXCHANGES = [REQUEST_EXCHANGE,IDENTIFY_EXCHANGE,RESULTS_EXCHANGE]
 
 class MessageBrokerBase(MessageQueue):
-    def __init__(self, node_name, user_id="guest",header={},exchange_info = REQUEST_EXCHANGE):
+    def __init__(self, node_name, user_id="guest",header={},exchange_info = REQUEST_EXCHANGE,routing_key=''):
         super(MessageBrokerBase, self).__init__(node_name, user_id)
         #self.exchange_name = exchange_info["name"]
         self.exchange = exchange_info
         self.setup()
         print self.queue_name
-        self.request_queue=self.queue_bind(self.exchange, header)
+        self.request_queue=self.queue_bind(self.exchange, header, routing_key)
         self.log( self.__class__.__name__)
         
     def start(self, ):
@@ -63,7 +63,7 @@ class Matcher(MessageBrokerBase):
         super(Matcher,self).on_recieve_callback(ch, method, properties, body)
         if not(self.node_name in properties.headers): # make sure not to match our own request
             body = "Match score = %f from %s"%(random.random(),self.node_name)
-            self.send(RESULTS_EXCHANGE["name"], body, properties.headers)
+            self.send(RESULTS_EXCHANGE["name"], body, properties.headers,routing_key=node_name)
 
 
 class Requester(MessageQueue):
@@ -76,7 +76,7 @@ class Requester(MessageQueue):
 
 class Receiver(MessageBrokerBase):
     def __init__(self, node_name, user_id="guest",header={},exchange_info = RESULTS_EXCHANGE):
-        super(Receiver, self).__init__(node_name, user_id,header, exchange_info)
+        super(Receiver, self).__init__(node_name, user_id,header, exchange_info, routing_key=node_name)
 
     def on_recieve_callback(self, ch, method, properties, body):
         super(Receiver,self).on_recieve_callback(ch, method, properties, body)
