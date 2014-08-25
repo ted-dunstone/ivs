@@ -4,7 +4,7 @@ import sys
 import getopt
 import threading
 from subprocess import check_call
-
+import time
 
 VERSION = 0.8
 
@@ -15,9 +15,9 @@ class Simulator(object):
 
      #pass in the list of hub/server exchanges, client exchanges, and request types (i.e, match, enrol, etc..-).
     def __init__(self, countries ):
-        #check_call('pkill -f send_msg.py',shell=True)
+        #check_call('pkill -f python',shell=True)
         check_call('python send_msg.py -b &',shell=True)
-                
+        time.sleep(5.0)        
         for c in countries:
             print "*****"+c
             check_call('python rabbitmqadmin.py declare user name="%s" password="guest" tags=""'%c,shell=True)
@@ -25,10 +25,10 @@ class Simulator(object):
             check_call(s,shell=True)
             if c!='broker':
             	check_call('python send_msg.py -m -n "%s" &'%c,shell=True)
-            	check_call('python send_msg.py -e -n "%s" &'%c,shell=True)
-        for i in range(1,5):
-            for c in countries:
-                check_call('python send_msg.py -r -n "%s" &'%c,shell=True)
+            	#check_call('python send_msg.py -e -n "%s" &'%c,shell=True)
+        #for i in range(1,20):
+        #    for c in countries:
+        #        check_call('python send_msg.py -r -n "%s" &'%c,shell=True)
             
 
 
