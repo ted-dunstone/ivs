@@ -13,20 +13,22 @@ logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.CRITICAL)
 class MessageQueue(object):
     def __init__(self, node_name, # the name of node
                         user_id="guest", # the user id
+                        settings=None # pass in settings
                         ):
         credentials = pika.PlainCredentials(user_id, 'guest')
         self.connection = pika.BlockingConnection(pika.ConnectionParameters(
-              host='localhost', credentials=credentials))
+              host=settings.rabbitmq_host, credentials=credentials))
         self.channel = self.connection.channel()
         self.node_name = node_name
         self.user_id = user_id
         self.corr_dict = {}
-        print "start node %s"%node_name
+        
+        self.log("start node %s"%node_name)
         
 
     def log(self, msg):
-        print self.node_name + ' : ' + msg
-    
+        print self.node_name + ' ('+self.__class__.__name__+')'+' : ' + msg
+        
     def setup(self, ):
         pass
     
@@ -57,7 +59,7 @@ class MessageQueue(object):
                        "destination":exchange})
         self.corr_id = str(uuid.uuid4())
         self.corr_dict[self.corr_id]=True
-        self.channel.basic_publish(exchange=exchange,
+        self.channel.basic_publish(exchange=exchange["name"],
                                 routing_key=routing_key,
                                 body=message,
                                 properties = pika.BasicProperties(
@@ -75,12 +77,16 @@ class MessageQueue(object):
             #print str(dict(callback_queue))
             #self.callback_queue.delete()
 
-    def queue_bind(self, exchange, header_match={},routing_key=''):
-        print str(exchange)
-        #self.channel.exchange_declare(exchange=exchange["name"], type=exchange["ex_type"])
-        #self.create_queue(self.node_name)
-        header_match.update({'x-match':'any'})
-
+    def queue_bind(self, exchange, header_match={},routing_key='',queue_name=None):
+        #print str(exchange)
+        if not queue_name:
+            self.queue_name = self.channel.queue_declare( exclusive=False, queue = exchange["name"]+'_'+self.node_name).method.queue
+        else:
+            self.queue_name = queue_name
+        
+        if len(header_match)>0:
+            header_match.update({'x-match':'any'})
+        
         self.channel.queue_bind(exchange=exchange["name"],
                            queue = self.queue_name,
                            routing_key = routing_key,
@@ -92,12 +98,6 @@ class MessageQueue(object):
         return "[Nothing implemented]"
 
     def on_recieve_callback(self, ch, method, properties, body):
-        #print properties.user_id
-        #print properties.reply_to
-        #print "{headers}:{body}".format(headers = properties.headers,
-        #                                body = body)
-        #print "wait...."
-        #time.sleep(10.0)
         if properties.reply_to:
             response = "Success"
             ch.basic_publish(exchange='',

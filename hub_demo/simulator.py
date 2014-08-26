@@ -17,7 +17,10 @@ class Simulator(object):
     def __init__(self, countries ):
         #check_call('pkill -f python',shell=True)
         check_call('python send_msg.py -b &',shell=True)
-        time.sleep(5.0)        
+        time.sleep(5.0)
+        check_call('python send_msg.py -l &',shell=True)
+ #       for exchange in ['Request','Identify','Results']:
+ #           check_call('python rabbitmqadmin.py delete exchange name=%s'%exchange,shell=True)    
         for c in countries:
             print "*****"+c
             check_call('python rabbitmqadmin.py declare user name="%s" password="guest" tags=""'%c,shell=True)
@@ -25,7 +28,7 @@ class Simulator(object):
             check_call(s,shell=True)
             if c!='broker':
             	check_call('python send_msg.py -m -n "%s" &'%c,shell=True)
-            	#check_call('python send_msg.py -e -n "%s" &'%c,shell=True)
+            	check_call('python send_msg.py -e -n "%s" &'%c,shell=True)
         #for i in range(1,20):
         #    for c in countries:
         #        check_call('python send_msg.py -r -n "%s" &'%c,shell=True)
