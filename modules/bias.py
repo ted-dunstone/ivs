@@ -28,9 +28,9 @@ import os, os.path
 #################
 
 GenericRequestParameters = {
-	 "Application":"AppID",
-	 "ApplicationUser":"ApplicationUserIdentifier",
-	 "BIASOperationName":""
+         "Application":"AppID",
+         "ApplicationUser":"ApplicationUserIdentifier",
+         "BIASOperationName":""
 }
 
 BinaryBIR = {
@@ -38,63 +38,63 @@ BinaryBIR = {
 }
 
 CBEFF_BIR_Type={
-	 "FormatOwner":0,
-	 "FormatType":0,
-	 "BIR_Information":{	
-		 "BIR_Info":"BIRInfoType"
+         "FormatOwner":0,
+         "FormatType":0,
+         "BIR_Information":{
+                 "BIR_Info":"BIRInfoType"
       },
-	 "BIR":BinaryBIR
+         "BIR":BinaryBIR
 }
 
-BiometricDataElementType= {	
-	 "BiometricType":"The type of biological or behavioral data stored in the biometric record, as defined by CBEFF",
-	 "BiometricTypeCount":	0,
-	 "BiometricSubType":	"More specifically defines the type of biometric data stored in the biometric record, as defined by CBEFF",
-     "BDBFormatOwner":	0,
-	 "BDBFormatType":	0
+BiometricDataElementType= {
+         "BiometricType":"The type of biological or behavioral data stored in the biometric record, as defined by CBEFF",
+         "BiometricTypeCount":  0,
+         "BiometricSubType":    "More specifically defines the type of biometric data stored in the biometric record, as defined by CBEFF",
+     "BDBFormatOwner":  0,
+         "BDBFormatType":       0
 }
 
-BIASBiometricDataType = {	
-	 "BIRList":[],
-	 "BIR":CBEFF_BIR_Type,
-	 "InputBIR":CBEFF_BIR_Type,
-	 "ReferenceBIR":CBEFF_BIR_Type,
-	 "BiometricDataList":[BiometricDataElementType]
+BIASBiometricDataType = {
+         "BIRList":[],
+         "BIR":CBEFF_BIR_Type,
+         "InputBIR":CBEFF_BIR_Type,
+         "ReferenceBIR":CBEFF_BIR_Type,
+         "BiometricDataList":[BiometricDataElementType]
 }
 
 
 BIASIDType = ""
 
 BiographicDataItemType = {
-	 'Name':'', #The name of the biographic data item
-	 'Type':'', #The data type for the biographic data item
-	 'Value':'' #The value assigned to the biographic data item.
+         'Name':'', #The name of the biographic data item
+         'Type':'', #The data type for the biographic data item
+         'Value':'' #The value assigned to the biographic data item.
 }
 
 BiographicDataSetType = {
     #for specific data formats non-XML (FBI-EFTS, FBI-EBTS, DOD-EBTS, or INT-I), XML (e.g., for NIEM, xNAL, and HR-XML or future versions of FBI-EBTS)
 }
 
-BiographicDataType={	
-	 'LastName':'',
-	 'FirstName':'',
-	 'BiographicDataItems':	[BiographicDataItemType],
-	 'BiographicDataSet':BiographicDataSetType
+BiographicDataType={
+         'LastName':'',
+         'FirstName':'',
+         'BiographicDataItems': [BiographicDataItemType],
+         'BiographicDataSet':BiographicDataSetType
 }
 
 BIASIdentity = {
-	 "SubjectID":BIASIDType,
-	 "IdentityClaim":BIASIDType,
-	 "EncounterID":BIASIDType,
-	 "EncounterList":[],
-	 "BiographicData":BiographicDataType,
-	 "BiographicDataElements":BiographicDataType,
-	 "BiometricData":BIASBiometricDataType
+         "SubjectID":BIASIDType,
+         "IdentityClaim":BIASIDType,
+         "EncounterID":BIASIDType,
+         "EncounterList":[],
+         "BiographicData":BiographicDataType,
+         "BiographicDataElements":BiographicDataType,
+         "BiometricData":BIASBiometricDataType
 }
 
 ResponseStatus={
-		 "Return":"0",
-		 "Message":"None"
+                 "Return":"0",
+                 "Message":"None"
 }
 
 
@@ -133,10 +133,10 @@ enrollSubjectRequest={
 }
 
 VerifySubjectResponse={
- 	"VerifySubjectResponsePackage":{	
-    	 "ResponseStatus": 	ResponseStatus,
-    	 "Match":False,
-    	 "Score":0.0
+        "VerifySubjectResponsePackage":{
+         "ResponseStatus":      ResponseStatus,
+         "Match":False,
+         "Score":0.0
     }
 }
 
@@ -198,7 +198,7 @@ def storeimage(fname,imgdata=None):
     return fullpath
 
 
-# Hub distribution code 
+# Hub distribution code
 
 def matching_servers(node_info,data):
     global connected_nodes, CONFIG
@@ -221,10 +221,10 @@ def matching_servers(node_info,data):
         lw["SubjectID"] = fname
         fext =data['Identity']['BiometricData']['BIR']['FormatType']
         if fext=='.eft':
-                lw["Score"]=random.random()
-                lw["Match"]= lw["Score"]>0.5
-                lw["Gallery"]  = ""
-                return VerifySubjectResponse
+            lw["Score"]=random.random()
+            lw["Match"]= lw["Score"]>0.5
+            lw["Gallery"]  = ""
+            return VerifySubjectResponse
         else:
             lw["ImageUrl"] = storeimage('upload_'+fname+'.png',imgdata)
             lw["fname"] = storeimage(fname+'.png')
@@ -297,9 +297,9 @@ def deserialize_response(dict_obj_json):
     if dict_obj_json.status_code!=200:
         return {'error':dict_obj_json.reason}
     try:
-      result = json.loads(dict_obj_json.json())
+        result = json.loads(dict_obj_json.json())
     except:
-      result = json.loads(dict_obj_json.json)
+        result = json.loads(dict_obj_json.json)
 #      print '********** ERROR ******'+dict_obj_json.json()
 #      raise
 
@@ -534,16 +534,16 @@ class Verify(object):
         data=json.load(open('static/data/pendingreports.json'))
         client_id=random.randint(100000000,999999999)
         form_val = request.form.to_dict()
-        
+
         data['Requests'].append(self.logstruct(client_id,form_val["Exchange"],"Thailand_Immigration",string.capwords(form_val["Exchange"],'_'),'Sent OK'))
         data['Response'].append(self.logstruct(client_id,form_val["Exchange"], string.capwords(form_val["Exchange"],'_'),"Thailand_Immigration",'Match OK'))
         json.dump(data,open('static/data/pendingreports.json','w'))
         imagename=storeimage('submit_'+str(random.random())+'_'+SubjectID+ext,base64.b64decode(imgdata))
 
         NISTResult={}
-	if ext == '.eft':
+        if ext == '.eft':
             eftname=storeimage('submit_'+str(random.random())+'_'+SubjectID+ext,base64.b64decode(imgdata))
-	    import modules.NISTutility as nu
+            import modules.NISTutility as nu
             NISTResult=nu.convertNIST(eftname,'jpg','new_i'+eftname)
             imagename = "/static/img/fld_3_9.jpg"
         verifySubjectRequest['Identity']['SubjectID']=SubjectID
@@ -563,7 +563,7 @@ class Verify(object):
     def on_assert(self, request):
         assert(False);
         pass
-    
+
     def logstruct(self, client_id, exchange, to_loc, from_loc, message):
         return {
             "REPORT_DATE_UTC": str(datetime.datetime.utcnow()),
@@ -639,5 +639,3 @@ class Verify(object):
             "RESULT_TYPE": "BAMS_Face",
             "CLIENT_FCC_COUNTRY": ""
         }
-    
-

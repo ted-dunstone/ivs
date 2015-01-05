@@ -7,6 +7,7 @@ import uuid
 import sys
 import logging
 
+
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.CRITICAL)
 
 
@@ -80,7 +81,7 @@ class MessageQueue(object):
     def queue_bind(self, exchange, header_match={},routing_key='',queue_name=None):
         #print str(exchange)
         if not queue_name:
-            self.queue_name = self.channel.queue_declare( exclusive=False, queue = exchange["name"]+'_'+self.node_name).method.queue
+            self.queue_name = self.channel.queue_declare( exclusive=False, queue = self.node_name+'_'+exchange["name"]).method.queue
         else:
             self.queue_name = queue_name
         

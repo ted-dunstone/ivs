@@ -3,32 +3,45 @@ import pika
 import sys
 import getopt
 import threading
-from subprocess import check_call
+from subprocess import call,check_call
 import time
 
 VERSION = 0.8
 
-COUNTRIES = ['broker','test@Immi.gov.au','test@Immi.gov.my','test@Immi.gov.id','test@Immi.gov.th']
+COUNTRIES = ['broker','test@Immi.gov.au','test@Immi.gov.my','test@Immi.gov.id','test@Immi.gov.th','test@Immi.gov.us']
 
 class Simulator(object):
 
 
      #pass in the list of hub/server exchanges, client exchanges, and request types (i.e, match, enrol, etc..-).
     def __init__(self, countries ):
-        #check_call('pkill -f python',shell=True)
+        call('pkill -f "python send_msg"',shell=True)
+        
+        # Start the broker
         check_call('python send_msg.py -b &',shell=True)
         time.sleep(5.0)
+        
+        # start the logger
         check_call('python send_msg.py -l &',shell=True)
+        
  #       for exchange in ['Request','Identify','Results']:
  #           check_call('python rabbitmqadmin.py delete exchange name=%s'%exchange,shell=True)    
         for c in countries:
             print "*****"+c
-            check_call('python rabbitmqadmin.py declare user name="%s" password="guest" tags=""'%c,shell=True)
+            
+            # setup user
+            check_call('python rabbitmqadmin.py declare user name="%s" password="guest" tags="Australia_NZ,Bali"'%c,shell=True)
             s = 'python rabbitmqadmin.py declare permission vhost="/" user="%s" configure=".*" write=".*" read=".*"'%c
             check_call(s,shell=True)
+            
             if c!='broker':
-            	check_call('python send_msg.py -m -n "%s" &'%c,shell=True)
-            	check_call('python send_msg.py -e -n "%s" &'%c,shell=True)
+                #start the matching service
+                check_call('python send_msg.py -m -n "%s" &'%c,shell=True)
+
+                #start the results listening service
+                check_call('python send_msg.py -e -n "%s" &'%c,shell=True)
+                
+        # simulate calls        
         #for i in range(1,20):
         #    for c in countries:
         #        check_call('python send_msg.py -r -n "%s" &'%c,shell=True)

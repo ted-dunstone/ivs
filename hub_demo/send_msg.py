@@ -13,9 +13,12 @@ VERSION = 0.5
 REQUEST_EXCHANGE = {"name":"Request", "ex_type":"headers"}
 IDENTIFY_EXCHANGE = {"name":"Identify", "ex_type":"headers"}
 RESULTS_EXCHANGE = {"name":"Results", "ex_type":"headers"}
+TRANSFORM_EXCHANGE = {"name":"Transform", "ex_type":"headers"}
 WEB_EXCHANGE      = {"name":"Web", "ex_type":"headers"}
+NIST_EXCHANGE      = {"name":"NIST", "ex_type":"headers"}
+SETTINGS_EXCHANGE = {'name':'settings','ex_type':'x-lvc'}
 
-EXCHANGES = [REQUEST_EXCHANGE,IDENTIFY_EXCHANGE,RESULTS_EXCHANGE,WEB_EXCHANGE]
+EXCHANGES = [REQUEST_EXCHANGE,IDENTIFY_EXCHANGE,RESULTS_EXCHANGE,TRANSFORM_EXCHANGE, WEB_EXCHANGE, NIST_EXCHANGE]
 
 class MessageBrokerBase(MessageQueue):
     # Base class
@@ -58,7 +61,60 @@ class Broker(MessageBrokerBase):
 
     def on_recieve_callback(self, ch, method, properties, body):
         super(Broker,self).on_recieve_callback(ch, method, properties, body)
+        if 'filetype' in properties.headers:
+            import sys,re
+            import json
+            sys.path.append("..")
+            import modules.NISTutility as nu
+            #try:
+            filename = './output.eft'
+            filestr = re.search(r'base64,(.*)', json.loads(body)['file_content']).group(1)
+            output = open(filename, 'wb')
+            output.write(filestr.decode('base64'))
+            output.close()
+            NISTResult=nu.convertNIST(filename,'jpg','new_i'+filename)
+            self.send(WEB_EXCHANGE, json.dumps(NISTResult), properties.headers, False)
+            #except:
+            #    self.send(WEB_EXCHANGE, "ERROR", properties.headers, False)
+                
+        
+        if 'setup' in  properties.headers:
+            # Send the message back to the receiever
+            exchange = RESULTS_EXCHANGE
+            if properties.headers['requester']=='Web':
+                exchange = WEB_EXCHANGE
+            body = "Exchange params"
+            self.send(exchange, body, properties.headers,routing_key=properties.headers['requester'])
+        else:
+            # Send the message onto the Identify Exchange
+            self.send(IDENTIFY_EXCHANGE, body, properties.headers, False)
+
+
+class Transformer(MessageBrokerBase):
+    # the broker class - binds to the REQUEST_EXCHANGE sends to the IDENTIFY_EXCHANGE
+    
+    def __init__(self, user_id="guest",header={},exchange_info = TRANSFORM_EXCHANGE,settings=None):
+        super(Broker, self).__init__("Transformer", user_id,header, exchange_info,settings=settings)
+                
+    def on_recieve_callback(self, ch, method, properties, body):
+        super(Broker,self).on_recieve_callback(ch, method, properties, body)
         self.send(IDENTIFY_EXCHANGE, body, properties.headers, False)
+
+class NISTExtractor(MessageBrokerBase):
+    # the broker class - binds to the REQUEST_EXCHANGE sends to the IDENTIFY_EXCHANGE
+    
+    def __init__(self, user_id="guest",header={},exchange_info = NIST_EXCHANGE,settings=None):
+        import sys
+        import json
+        sys.path.append("..")
+        import modules.NISTutility as nu
+        
+        super(Broker, self).__init__("NISTExtractor", user_id,header, exchange_info,settings=settings)
+                
+    def on_recieve_callback(self, ch, method, properties, body):
+        super(Broker,self).on_recieve_callback(ch, method, properties, body)
+        NISTResult=nu.convertNIST(eftname,'jpg','new_i'+eftname)
+        self.send(WEB_EXCHANGE, json.dumps(NISTResult), properties.headers, False)
 
 class MsgLog(MessageQueue):
     # the logging class - binds to the fire_host
@@ -67,6 +123,7 @@ class MsgLog(MessageQueue):
         super(MsgLog, self).__init__("Logger", user_id,settings=settings)
         self.channel.queue_declare(queue='firehose-queue', durable=False,auto_delete=True, exclusive=True)
         self.request_queue=self.queue_bind({"name":"Results"},queue_name= 'firehose-queue', routing_key='#')
+        self.request_queue=self.queue_bind({"name":"Web"},queue_name= 'firehose-queue', routing_key='#')
         #self.request_queue=self.queue_bind({"name":"Request"},queue_name= 'firehose-queue', routing_key='#')
         self.request_queue=self.queue_bind({"name":"Identify"},queue_name= 'firehose-queue', routing_key='#')
         
@@ -74,11 +131,12 @@ class MsgLog(MessageQueue):
         #self.log(body)
         if 'requester' in properties.headers:
             self.log("from %s for %s to %s"%( properties.headers['requester'], properties.headers['destination']['name'], properties.headers['last_node']))
+            self.log(str(properties.user_id))
         #else:
-        #self.log(str(properties))
-        #self.log(str(method))
-        self.log(str(body))
+        #self.log(str(properties))                      body))
         
+        #self.log(str(method))
+        #self.log(str(
     def start(self, ):
         self.start_consume(self.request_queue)
 
@@ -101,6 +159,7 @@ class Matcher(MessageBrokerBase):
             exchange = RESULTS_EXCHANGE
             if properties.headers['requester']=='Web':
                 exchange = WEB_EXCHANGE
+            self.log("my exchange is "+str(exchange))
             self.send(exchange, body, properties.headers,routing_key=properties.headers['requester'])
 
 
@@ -128,6 +187,8 @@ class Receiver(MessageBrokerBase):
 if __name__ == "__main__":
 
     import argparse
+    from subprocess import check_call
+
 
 
     # Parse command line args
@@ -164,6 +225,10 @@ if __name__ == "__main__":
 
     header={"test":"test"}
     if args.is_matcher:
+        check_call('python rabbitmqadmin.py declare user name="%s" password="guest" tags="Australia_NZ,Bali"'%args.name,shell=True)
+        s = 'python rabbitmqadmin.py declare permission vhost="/" user="%s" configure=".*" write=".*" read=".*"'%args.name
+        check_call(s,shell=True)
+
         matcher = Matcher(args.name,args.name,header,settings=args)
         matcher.start()
     elif args.is_broker:
